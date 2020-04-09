@@ -1,0 +1,215 @@
+bot:
+    prefix:      "!"
+    token:       !ENV "BOT_TOKEN"
+
+guild:
+    id: 608625191068631040
+
+    channels:
+        announcements:                      697817678043152424
+
+        # Social
+        global:                             697817811325681678
+        off_topic:                          697817913083560000
+        ask_for_help:                       697817937653923850
+        commands:                           697817950790484140
+
+        # Staff
+        admins:             &ADMINS         697818008093196308
+        mods:               &MODS           697818023154810890
+
+        # Support
+        support:                            697818080763445411
+        suggestions:                        697818094219034634
+        report:                             697818104855658549
+
+        # Logs
+        attachment_log:                     697818158265794770
+        message_log:        &MESSAGE_LOG    697818175118770176
+        user_log:                           697818221537132564
+        mod_log:            &MOD_LOG        697818242781151232
+
+    moderation_channels:
+        - *ADMINS
+
+    staff_channels:
+        - *ADMINS
+        - *MODS
+
+    roles:
+        # Special
+        announcements:                      697467773575626832
+        muted:              &MUTED_ROLE     697467577089392661
+
+        # Default
+        guests:                              697464025201508352
+        members:                             697819236969480244
+
+        # Staff
+        owners:             &OWNERS_ROLE    697467112851112036
+        admins:             &ADMINS_ROLE    608630199780900874
+        mods:               &MODS_ROLE      697463912404090930
+        trial_mods:         &T_MODS_ROLE    697818706834620457
+
+    moderation_roles:
+        - *OWNERS_ROLE
+        - *ADMINS_ROLE
+
+    staff_roles:
+        - *OWNERS_ROLE
+        - *ADMINS_ROLE
+        - *MODS_ROLE
+        - *T_MODS_ROLE
+
+filter:
+    domain_blacklist:
+        - pornhub.com
+        - yoütu.be
+        - discörd.com
+        - minecräft.com
+        - disçordapp.com
+
+    word_watchlist:
+        - fa+g+s*
+        - jew+s*
+        - fag+o+t+s*
+        - suicide
+        - rape
+        - shemale
+
+    # Censor doesn't apply to these
+    channel_whitelist:
+        - *ADMINS
+        - *MODS
+        - *MESSAGE_LOG
+        - *MOD_LOG
+
+    role_whitelist:
+        - *OWNERS_ROLE
+        - *ADMINS_ROLE
+        - *MODS_ROLE
+        - *T_MODS_ROLE
+
+anti_spam:
+    # Clean messages that violate a rule
+    clean_offending: true
+
+    punishment:
+        role_id: *MUTED_ROLE
+        remove_after: 600
+
+    rules:
+        attachments:
+            interval: 1
+            max: 9
+
+        burst:
+            interval: 1
+            max: 700
+
+        duplicates:
+            interval: 1
+            max: 3
+
+        discord_emojis:
+            interval: 1
+            max: 20
+
+        links:
+            interval: 10
+            max: 10
+
+        mentions:
+            interval: 1
+            max: 5
+
+        role_mentions:
+            interval: 1
+            max: 3
+
+    role_whitelist:
+        - *OWNERS_ROLE
+        - *ADMINS_ROLE
+        - *MODS_ROLE
+        - *T_MODS_ROLE
+
+anti_malware:
+    whitelist:
+        - '.3gp'
+        - '.3g2'
+        - '.avi'
+        - '.bmp'
+        - '.gif'
+        - '.h264'
+        - '.jpg'
+        - '.jpeg'
+        - '.m4v'
+        - '.mkv'
+        - '.mov'
+        - '.mp4'
+        - '.mpeg'
+        - '.mpg'
+        - '.png'
+        - '.tiff'
+        - '.wmv'
+        - '.svg'
+        - '.psd'  # Photoshop
+        - '.ai'   # Illustrator
+        - '.aep'  # After Effects
+        - '.xcf'  # GIMP
+        - '.mp3'
+        - '.wav'
+        - '.ogg'
+        - '.md'
+
+style:
+    emojis:
+        defcon_disabled: "<:defcondisabled:470326273952972810>"
+        defcon_enabled:  "<:defconenabled:470326274213150730>"
+        defcon_updated:  "<:defconsettingsupdated:470326274082996224>"
+
+        status_online:  "<:status_online:470326272351010816>"
+        status_idle:    "<:status_idle:470326266625785866>"
+        status_dnd:     "<:status_dnd:470326272082313216>"
+        status_offline: "<:status_offline:470326266537705472>"
+
+        bullet:     "\u2022"
+        pencil:     "\u270F"
+        new:        "\U0001F195"
+        cross_mark: "\u274C"
+        check_mark: "\u2705"
+
+        upvotes:        "<:upvotes:638729835245731840>"
+        comments:       "<:comments:638729835073765387>"
+        user:           "<:user:638729835442602003>"
+
+    icons:
+        message_bulk_delete: "https://cdn.discordapp.com/emojis/469952898994929668.png"
+        message_delete:      "https://cdn.discordapp.com/emojis/472472641320648704.png"
+        message_edit:        "https://cdn.discordapp.com/emojis/472472638976163870.png"
+
+        sign_in:  "https://cdn.discordapp.com/emojis/469952898181234698.png"
+        sign_out: "https://cdn.discordapp.com/emojis/469952898089091082.png"
+
+        filtering: "https://cdn.discordapp.com/emojis/472472638594482195.png"
+
+        user_ban:    "https://cdn.discordapp.com/emojis/469952898026045441.png"
+        user_unban:  "https://cdn.discordapp.com/emojis/469952898692808704.png"
+        user_update: "https://cdn.discordapp.com/emojis/469952898684551168.png"
+
+        user_mute:     "https://cdn.discordapp.com/emojis/472472640100106250.png"
+        user_unmute:   "https://cdn.discordapp.com/emojis/472472639206719508.png"
+
+        user_warn: "https://cdn.discordapp.com/emojis/470326274238447633.png"
+
+        pencil: "https://cdn.discordapp.com/emojis/470326272401211415.png"
+        questionmark: "https://cdn.discordapp.com/emojis/512367613339369475.png"
+
+        hash_blurple: "https://cdn.discordapp.com/emojis/469950142942806017.png"
+        hash_green:   "https://cdn.discordapp.com/emojis/469950144918585344.png"
+        hash_red:     "https://cdn.discordapp.com/emojis/469950145413251072.png"
+
+        defcon_denied:   "https://cdn.discordapp.com/emojis/472475292078964738.png"
+        defcon_disabled: "https://cdn.discordapp.com/emojis/470326273952972810.png"
+        defcon_enabled:  "https://cdn.discordapp.com/emojis/470326274213150730.png"
+        defcon_updated:  "https://cdn.discordapp.com/emojis/472472638342561793.png"
