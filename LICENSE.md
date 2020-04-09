@@ -2,7 +2,8 @@ MIT License
 
 Copyright (c) 2018 Python Discord
 
-Some parts of the code for this project were taken from [PythonDiscord's GitHub project](htps://github.com/python-discord/bot)
+Some parts of the code for this project were taken from:
+PythonDiscord's GitHub project (htps://github.com/python-discord/bot)
 
 Copyright (c) 2020 Koumakpet
 
