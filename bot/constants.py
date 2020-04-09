@@ -198,6 +198,15 @@ class CleanMessages(metaclass=YAMLGetter):
     message_limit: int
 
 
+class Colours(metaclass=YAMLGetter):
+    section = 'style'
+    subsection = 'colours'
+
+    soft_red: int
+    soft_green: int
+    soft_orange: int
+
+
 class Emoji(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'emojis'

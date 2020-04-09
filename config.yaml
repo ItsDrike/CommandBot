@@ -167,6 +167,11 @@ clean_messages:
     message_limit: 10000
 
 style:
+    colours:
+        soft_red: 0xcd6d6d
+        soft_green: 0x68c290
+        soft_orange: 0xf9cb54
+
     emojis:
         defcon_disabled: "<:defcondisabled:470326273952972810>"
         defcon_enabled:  "<:defconenabled:470326274213150730>"
