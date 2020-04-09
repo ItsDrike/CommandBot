@@ -162,6 +162,10 @@ anti_malware:
         - '.ogg'
         - '.md'
 
+clean_messages:
+    # Maximum amount of messages that can be cleaned
+    message_limit: 10000
+
 style:
     emojis:
         defcon_disabled: "<:defcondisabled:470326273952972810>"

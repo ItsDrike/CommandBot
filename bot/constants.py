@@ -100,7 +100,8 @@ class YAMLGetter(type):
                 (cls.section, cls.subsection, name)
                 if cls.subsection is not None else (cls.section, name)
             )
-            log.critical(f'Tried accessing configuration variable at `{dotted_path}`, but it could not be found.')
+            log.critical(
+                f'Tried accessing configuration variable at `{dotted_path}`, but it could not be found.')
             raise
 
     def __getitem__(cls, name):
@@ -191,6 +192,12 @@ class AntiMalware(metaclass=YAMLGetter):
     whitelist: list
 
 
+class CleanMessages(metaclass=YAMLGetter):
+    section = 'clean_messages'
+
+    message_limit: int
+
+
 class Emoji(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'emojis'
@@ -251,3 +258,39 @@ STAFF_ROLES = Guild.staff_channels
 
 MODERATION_CHANNELS = Guild.moderation_channels
 STAFF_CHANNELS = Guild.staff_channels
+
+
+# Bot replies
+NEGATIVE_REPLIES = [
+    "Noooooo!!",
+    "Nope.",
+    "I don't think so.",
+    "Not gonna happen.",
+    "Huh? No.",
+    "Nah.",
+    "NEGATORY.",
+]
+
+POSITIVE_REPLIES = [
+    "Yep.",
+    "Absolutely!",
+    "Can do!",
+    "Affirmative!",
+    "Sure.",
+    "Sure thing!",
+    "Okay.",
+    "Alright.",
+    "You got it!",
+    "ROGER THAT",
+]
+
+ERROR_REPLIES = [
+    "Please don't do that.",
+    "You have to stop.",
+    "That was a mistake.",
+    "You blew it.",
+    "You're bad at computers.",
+    "Are you trying to kill me?",
+    "Noooooo!!",
+    "I can't believe you've done this",
+]
