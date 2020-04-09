@@ -11,6 +11,10 @@ pyyaml = "*"
 coloredlogs = "*"
 flake8 = "*"
 autopep8 = "*"
+python-dateutil = "*"
+deepdiff = "*"
+fuzzywuzzy = "*"
+python-levenshtein = "*"
 
 [requires]
 python_version = "3.8"
