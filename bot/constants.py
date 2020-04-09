@@ -304,7 +304,7 @@ class Event(Enum):
 
 # Some vars
 MODERATION_ROLES = Guild.moderation_roles
-STAFF_ROLES = Guild.staff_channels
+STAFF_ROLES = Guild.staff_roles
 
 MODERATION_CHANNELS = Guild.moderation_channels
 STAFF_CHANNELS = Guild.staff_channels
