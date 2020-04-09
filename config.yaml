@@ -24,7 +24,7 @@ guild:
         report:                             697818104855658549
 
         # Logs
-        attachment_log:                     697818158265794770
+        attachment_log:     &ATTACH_LOG     697818158265794770
         message_log:        &MESSAGE_LOG    697818175118770176
         user_log:                           697818221537132564
         mod_log:            &MOD_LOG        697818242781151232
@@ -35,6 +35,14 @@ guild:
     staff_channels:
         - *ADMINS
         - *MODS
+
+    # Modlog cog ignores events which occur in these channels
+
+    modlog_blacklist:
+        - *ADMINS
+        - *ATTACH_LOG
+        - *MESSAGE_LOG
+        - *MOD_LOG
 
     roles:
         # Special
@@ -166,6 +174,10 @@ clean_messages:
     # Maximum amount of messages that can be cleaned
     message_limit: 10000
 
+redirect_output:
+    delete_invocation: true
+    delete_delay: 15
+
 style:
     colours:
         soft_red: 0xcd6d6d
@@ -182,6 +194,7 @@ style:
         status_dnd:     "<:status_dnd:470326272082313216>"
         status_offline: "<:status_offline:470326266537705472>"
 
+        delete:     "\u274c"
         bullet:     "\u2022"
         pencil:     "\u270F"
         new:        "\U0001F195"
@@ -193,6 +206,10 @@ style:
         user:           "<:user:638729835442602003>"
 
     icons:
+        crown_blurple: "https://cdn.discordapp.com/emojis/469964153289965568.png"
+        crown_green:   "https://cdn.discordapp.com/emojis/469964154719961088.png"
+        crown_red:     "https://cdn.discordapp.com/emojis/469964154879344640.png"
+
         message_bulk_delete: "https://cdn.discordapp.com/emojis/469952898994929668.png"
         message_delete:      "https://cdn.discordapp.com/emojis/472472641320648704.png"
         message_edit:        "https://cdn.discordapp.com/emojis/472472638976163870.png"

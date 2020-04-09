@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Dict, List
+from enum import Enum
 
 import yaml
 
@@ -130,6 +131,8 @@ class Guild(metaclass=YAMLGetter):
     moderation_roles: List[int]
     staff_roles: List[int]
 
+    modlog_blacklist: List[int]
+
 
 class Roles(metaclass=YAMLGetter):
     section = 'guild'
@@ -198,6 +201,13 @@ class CleanMessages(metaclass=YAMLGetter):
     message_limit: int
 
 
+class RedirectOutput(metaclass=YAMLGetter):
+    section = 'redirect_output'
+
+    delete_invocation: bool
+    delete_delay: int
+
+
 class Colours(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'colours'
@@ -207,7 +217,7 @@ class Colours(metaclass=YAMLGetter):
     soft_orange: int
 
 
-class Emoji(metaclass=YAMLGetter):
+class Emojis(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'emojis'
 
@@ -220,6 +230,7 @@ class Emoji(metaclass=YAMLGetter):
     status_dnd: str
     status_offline: str
 
+    delete: str
     bullet: str
     pencil: str
     new: str
@@ -234,6 +245,10 @@ class Emoji(metaclass=YAMLGetter):
 class Icons(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'icons'
+
+    crown_blurple: str
+    crown_green: str
+    crown_red: str
 
     message_bulk_delete: str
     message_delete: str
@@ -259,6 +274,32 @@ class Icons(metaclass=YAMLGetter):
     defcon_disabled: str
     defcon_enables: str
     defcon_updated: str
+
+
+class Event(Enum):
+    """
+    Event names. This does not include every event (for example, raw
+    events aren't here), but only events used in ModLog for now.
+    """
+
+    guild_channel_create = "guild_channel_create"
+    guild_channel_delete = "guild_channel_delete"
+    guild_channel_update = "guild_channel_update"
+    guild_role_create = "guild_role_create"
+    guild_role_delete = "guild_role_delete"
+    guild_role_update = "guild_role_update"
+    guild_update = "guild_update"
+
+    member_join = "member_join"
+    member_remove = "member_remove"
+    member_ban = "member_ban"
+    member_unban = "member_unban"
+    member_update = "member_update"
+
+    message_delete = "message_delete"
+    message_edit = "message_edit"
+
+    voice_state_update = "voice_state_update"
 
 
 # Some vars
