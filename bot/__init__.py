@@ -13,7 +13,8 @@ log_format = logging.Formatter(format_string)
 # Setup logging file
 log_file = Path('logs', 'bot.log')
 log_file.parent.mkdir(exist_ok=True)
-file_handler = handlers.RotatingFileHandler(log_file, maxBytes=5242880, backupCount=7)
+file_handler = handlers.RotatingFileHandler(
+    log_file, maxBytes=5242880, backupCount=7)
 file_handler.setFormatter(log_format)
 
 # Setup root_logger
@@ -36,6 +37,7 @@ coloredlogs.install(logger=root_logger, stream=sys.stdout)
 # Set other logging levels on imported modules
 logging.getLogger('discord').setLevel(logging.WARNING)
 logging.getLogger('websockets').setLevel(logging.WARNING)
+logging.getLogger('deepdiff').setLevel(logging.WARNING)
 logging.getLogger('asyncio').setLevel(logging.INFO)
 
 logging.getLogger(__name__)
