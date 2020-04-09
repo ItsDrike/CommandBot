@@ -15,6 +15,7 @@ python-dateutil = "*"
 deepdiff = "*"
 fuzzywuzzy = "*"
 python-levenshtein = "*"
+sentry-sdk = "*"
 
 [requires]
 python_version = "3.8"
