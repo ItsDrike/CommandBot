@@ -9,3 +9,6 @@ __pycache__/
 
 #Ignore logfiles
 *.log
+
+# Ignore enviromental vars (contains private information)
+.env
