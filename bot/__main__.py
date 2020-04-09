@@ -16,9 +16,10 @@ client = Bot(
 
 @client.event
 async def on_ready():
-    log.info('Bot is ready.')
+    log.info('Bot is ready')
 
 
+client.load_extension('bot.cogs.error_handler')
 client.load_extension('bot.cogs.help')
 client.load_extension('bot.cogs.moderation')
 client.load_extension('bot.cogs.clean')
