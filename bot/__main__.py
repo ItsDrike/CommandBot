@@ -4,6 +4,7 @@ import discord
 
 from bot import constants
 from bot.bot import Bot
+from bot.database import SQLite
 
 log = logging.getLogger('bot')
 
@@ -12,6 +13,10 @@ client = Bot(
     activity=discord.Game(name='Use !help'),
     case_insensitivity=True
 )
+
+db = SQLite()
+db.create_init_tables()
+db.close()
 
 
 @client.event
@@ -27,4 +32,7 @@ client.load_extension('bot.cogs.moderation')
 client.load_extension('bot.cogs.information')
 client.load_extension('bot.cogs.clean')
 
-client.run(constants.Bot.token)
+if constants.Bot.token:
+    client.run(constants.Bot.token)
+else:
+    log.error('Bot token not found')
