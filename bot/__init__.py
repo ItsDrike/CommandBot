@@ -40,5 +40,6 @@ logging.getLogger('websockets').setLevel(logging.WARNING)
 logging.getLogger('deepdiff').setLevel(logging.WARNING)
 logging.getLogger('asyncio').setLevel(logging.INFO)
 logging.getLogger('bot.utils.checks').setLevel(logging.INFO)
+logging.getLogger('bot.pagination').setLevel(logging.INFO)
 
 logging.getLogger(__name__)
