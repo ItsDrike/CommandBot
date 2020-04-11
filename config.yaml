@@ -189,10 +189,10 @@ style:
         defcon_enabled:  "<:defconenabled:470326274213150730>"
         defcon_updated:  "<:defconsettingsupdated:470326274082996224>"
 
-        status_online:  "<:status_online:470326272351010816>"
-        status_idle:    "<:status_idle:470326266625785866>"
-        status_dnd:     "<:status_dnd:470326272082313216>"
-        status_offline: "<:status_offline:470326266537705472>"
+        status_online:  "\U0001f7e2"
+        status_idle:    "\U0001f7e0"
+        status_dnd:     "\U0001f534"
+        status_offline: "\u26aa"
 
         delete:     "\u274c"
         bullet:     "\u2022"
