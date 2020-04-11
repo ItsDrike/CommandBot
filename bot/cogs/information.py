@@ -1,21 +1,22 @@
 import colorsys
 import logging
-import pprint
 import textwrap
 from collections import Counter, defaultdict
 from string import Template
 from typing import Any, Mapping, Optional, Union
 
-from discord import Colour, Embed, Member, Message, Role, Status, utils
-from discord.ext.commands import BucketType, Cog, Context, Paginator, command, group
+from discord import Colour, Embed, Member, Role, Status, utils
+from discord.ext.commands import Cog, Context, command
 from discord.utils import escape_markdown
 
 from bot import constants
 from bot.bot import Bot
-from bot.decorators import InChannelCheckFailure, in_channel, with_role
+from bot.decorators import InChannelCheckFailure, with_role
 from bot.pagination import LinePaginator
-from bot.utils.checks import cooldown_with_role_bypass, with_role_check
+from bot.utils.checks import with_role_check, has_higher_role_check
 from bot.utils.time import time_since
+import bot.utils.infractions as infractions
+
 
 log = logging.getLogger(__name__)
 
@@ -164,6 +165,26 @@ class Information(Cog):
 
         await ctx.send(embed=embed)
 
+    @command(name="infractions", aliases=["show_infractions"])
+    async def infractions(self, ctx: Context, user: Member = None) -> None:
+        '''Return user's infractions'''
+        if user is None:
+            user = ctx.author
+
+        # Do a role check if this is being executed on someone other than the caller
+        elif user != ctx.author and not with_role_check(ctx, *constants.STAFF_ROLES):
+            await ctx.send("You may not use this command on users other than yourself.")
+            return
+
+        # Prevent usage on someone with higher role
+        if not has_higher_role_check(ctx.author, user):
+            await ctx.send('You may not use this command on users with higher role than yours')
+            return
+
+        embed = await self.create_infractions_embed(ctx, user)
+
+        await ctx.send(embed=embed)
+
     async def create_user_embed(self, ctx: Context, user: Member) -> Embed:
         """Creates an embed containing information on the `user`."""
         created = time_since(user.created_at, max_units=3)
@@ -198,11 +219,9 @@ class Information(Cog):
                 Roles: {roles or None}
             """).strip()
         ]
-
         # Show more verbose output in moderation channels for infractions and nominations
         if ctx.channel.id in constants.MODERATION_CHANNELS:
             description.append(await self.expanded_user_infraction_counts(user))
-            description.append(await self.user_nomination_counts(user))
         else:
             description.append(await self.basic_user_infraction_counts(user))
 
@@ -217,24 +236,34 @@ class Information(Cog):
 
         return embed
 
-    async def basic_user_infraction_counts(self, member: Member) -> str:
-        # TODO: Solve infraction (NO API)
-        """Gets the total and active infraction counts for the given `member`."""
-        try:
-            infractions = await self.bot.api_client.get(
-                'bot/infractions',
-                params={
-                    'hidden': 'False',
-                    'user__id': str(member.id)
-                }
-            )
+    async def create_infractions_embed(self, ctx: Context, user: Member) -> Embed:
+        """Create an embed containing information on user's infractions"""
 
-            total_infractions = len(infractions)
-            active_infractions = sum(infraction['active']
-                                     for infraction in infractions)
-        except AttributeError:
-            total_infractions = 0
-            active_infractions = 0
+        name = str(user)
+        if user.nick:
+            name = f'{user.nick} ({name})'
+
+        roles = user.roles[1:]
+
+        description = await self.full_user_infraction_counts(user)
+
+        embed = Embed(
+            title=name,
+            description=description
+        )
+
+        embed.set_thumbnail(url=user.avatar_url_as(format="png"))
+        embed.colour = user.top_role.colour if roles else Colour.blurple()
+
+        return embed
+
+    async def basic_user_infraction_counts(self, member: Member) -> str:
+        """Gets the total and active infraction counts for the given `member`."""
+        infs = infractions.get_infractions(member)
+        active_infs = infractions.get_active_infractions(member)
+
+        total_infractions = len(infs)
+        active_infractions = len(active_infs)
 
         infraction_output = f"**Infractions**\nTotal: {total_infractions}\nActive: {active_infractions}"
 
@@ -247,24 +276,19 @@ class Information(Cog):
         The counts will be split by infraction type and the number of active infractions for each type will indicated
         in the output as well.
         """
-        infractions = await self.bot.api_client.get(
-            'bot/infractions',
-            params={
-                'user__id': str(member.id)
-            }
-        )
+        infs = infractions.get_infractions(member)
 
         infraction_output = ["**Infractions**"]
-        if not infractions:
+        if not infs:
             infraction_output.append(
                 "This user has never received an infraction.")
         else:
             # Count infractions split by `type` and `active` status for this user
             infraction_types = set()
             infraction_counter = defaultdict(int)
-            for infraction in infractions:
-                infraction_type = infraction["type"]
-                infraction_active = 'active' if infraction["active"] else 'inactive'
+            for infraction in infs:
+                infraction_type = infraction.type
+                infraction_active = 'active' if infraction.active else 'inactive'
 
                 infraction_types.add(infraction_type)
                 infraction_counter[f"{infraction_active} {infraction_type}"] += 1
@@ -283,33 +307,59 @@ class Information(Cog):
 
         return "\n".join(infraction_output)
 
-    async def user_nomination_counts(self, member: Member) -> str:
-        """Gets the active and historical nomination counts for the given `member`."""
-        nominations = await self.bot.api_client.get(
-            'bot/nominations',
-            params={
-                'user__id': str(member.id)
-            }
-        )
+    async def full_user_infraction_counts(self, member: Member) -> str:
+        """
+        Gets full infraction info with descriptions for the given member
 
-        output = ["**Nominations**"]
+        The counts will be split by `active` status and infraction `type`
+        """
 
-        if not nominations:
-            output.append("This user has never been nominated.")
+        def get_infractions_by_type(all_infractions: list) -> dict:
+            infraction_types = set()
+            infractions_dict = defaultdict(list)
+            for infraction in all_infractions:
+                infraction_type = infraction.type
+                infraction_types.add(infraction_type)
+
+                infractions_dict[infraction_type].append(infraction)
+
+            line = '```yaml\n'
+            for infraction_type in sorted(infraction_types):
+                line += f'{infraction_type}s:\n'
+                for infraction in infractions_dict[infraction_type]:
+                    line += f'  {(infraction.reason).replace(" ", "_")}:\n'
+                    # TODO: Time conversion (mins, hours, days, etc..)
+                    line += f'      duration: {infraction.duration} seconds\n'
+                    line += f'      time: {infraction.str_start}\n'
+            line = line[:-1]
+            line += '```'
+
+            return line
+
+        active_infs = infractions.get_active_infractions(member)
+        inactive_infs = infractions.get_inactive_infractions(member)
+
+        if not active_infs and not inactive_infs:
+            infraction_output = ["**Infractions**"]
+            infraction_output.append(
+                "This user has never received an infraction.")
         else:
-            count = len(nominations)
-            is_currently_nominated = any(
-                nomination["active"] for nomination in nominations)
-            nomination_noun = "nomination" if count == 1 else "nominations"
-
-            if is_currently_nominated:
-                output.append(
-                    f"This user is **currently** nominated ({count} {nomination_noun} in total).")
+            infraction_output = ["**Active Infractions**"]
+            if not active_infs:
+                infraction_output.append(
+                    "This user has no active infractions.")
             else:
-                output.append(
-                    f"This user has {count} historical {nomination_noun}, but is currently not nominated.")
+                infraction_output.append(
+                    get_infractions_by_type(active_infs))
+            infraction_output.append("**Inactive Infractions**")
+            if not inactive_infs:
+                infraction_output.append(
+                    "This user has no inactive infractions.")
+            else:
+                infraction_output.append(
+                    get_infractions_by_type(inactive_infs))
 
-        return "\n".join(output)
+        return '\n'.join(infraction_output)
 
     def format_fields(self, mapping: Mapping[str, Any], field_width: Optional[int] = None) -> str:
         """Format a mapping to be readable to a human."""
