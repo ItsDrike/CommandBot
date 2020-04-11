@@ -12,3 +12,6 @@ __pycache__/
 
 # Ignore enviromental vars (contains private information)
 .env
+
+# Ignore the database file, should stay private
+users.db
