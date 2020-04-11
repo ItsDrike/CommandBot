@@ -171,6 +171,12 @@ class Channels(metaclass=YAMLGetter):
     mod_log: int
 
 
+class Database(metaclass=YAMLGetter):
+    section = 'database'
+
+    db_name: str
+
+
 class AntiSpam(metaclass=YAMLGetter):
     section = 'anti_spam'
 
