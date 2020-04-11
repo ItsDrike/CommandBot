@@ -23,6 +23,8 @@ client.load_extension('bot.cogs.error_handler')
 client.load_extension('bot.cogs.security')
 client.load_extension('bot.cogs.help')
 client.load_extension('bot.cogs.moderation')
+
+client.load_extension('bot.cogs.information')
 client.load_extension('bot.cogs.clean')
 
 client.run(constants.Bot.token)
