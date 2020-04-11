@@ -214,6 +214,12 @@ class RedirectOutput(metaclass=YAMLGetter):
     delete_delay: int
 
 
+class Time(metaclass=YAMLGetter):
+    section = 'style'
+
+    time_format: str
+
+
 class Colours(metaclass=YAMLGetter):
     section = 'style'
     subsection = 'colours'

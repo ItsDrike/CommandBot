@@ -182,6 +182,7 @@ redirect_output:
     delete_delay: 15
 
 style:
+    time_format: '%Y/%m/%d %H:%M:%S'
     colours:
         soft_red: 0xcd6d6d
         soft_green: 0x68c290
