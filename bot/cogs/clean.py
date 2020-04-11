@@ -11,7 +11,7 @@ from bot.decorators import with_role
 from bot.constants import (
     CleanMessages, NEGATIVE_REPLIES,
     Colours, Event, Icons, Channels,
-    MODERATION_ROLES
+    STAFF_ROLES, MODERATION_ROLES
 )
 
 log = logging.getLogger(__name__)
@@ -169,13 +169,14 @@ class Clean(Cog):
 
     # When no subcommand was found, invoke help
     @group(invoke_without_command=True, name='clean', aliases=['purge', 'clear'])
-    @with_role(*MODERATION_ROLES)
+    @with_role(*STAFF_ROLES)
     async def clean_group(self, ctx: Context) -> None:
+        # TODO: Room protection if not MODERATION_ROLES
         '''Commands for cleaning messages in channels.'''
         await ctx.invoke(self.bot.get_command('help'), 'clean')
 
     @clean_group.command(name='user', aliases=['users'])
-    @with_role(*MODERATION_ROLES)
+    @with_role(*STAFF_ROLES)
     async def clean_user(
         self,
         ctx: Context,
@@ -209,7 +210,7 @@ class Clean(Cog):
         await self._clean_messages(amount, ctx, bots_only=True, channel=channel)
 
     @clean_group.command(name='regex', aliases=['word', 'expression'])
-    @with_role(*MODERATION_ROLES)
+    @with_role(*STAFF_ROLES)
     async def clean_regex(
         self,
         ctx: Context,
