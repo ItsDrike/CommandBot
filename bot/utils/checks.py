@@ -3,6 +3,7 @@ import logging
 from typing import Callable, Iterable
 
 from discord.ext.commands import BucketType, Cog, Command, CommandOnCooldown, Context, Cooldown, CooldownMapping
+from discord import Member
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,18 @@ def in_channel_check(ctx: Context, *channel_ids: int) -> bool:
     log.debug(f"{ctx.author} tried to call the '{ctx.command.name}' command. "
               f"The result of the in_channel check was {check}.")
     return check
+
+
+def has_higher_role_check(check_user: Member, user: Member) -> bool:
+    """Check if user has higher (or same) role than other user"""
+    # Get all user roles
+    check_user_roles = [role.position for role in check_user.roles]
+    user_roles = [role.position for role in user.roles]
+    # Get highest role of users
+    check_user_max = max(check_user_roles)
+    user_max = max(user_roles)
+
+    return check_user_max >= user_max
 
 
 def cooldown_with_role_bypass(rate: int, per: float, type: BucketType = BucketType.default, *,
