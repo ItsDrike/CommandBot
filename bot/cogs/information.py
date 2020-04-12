@@ -225,8 +225,8 @@ class Information(Cog):
             """).strip()
         ]
         if has_higher_role_check(ctx.author, user):
-            # Show more verbose output in moderation channels for infractions and nominations
-            if ctx.channel.id in constants.MODERATION_CHANNELS:
+            # Show more verbose output in staff channels for infractions
+            if ctx.channel.id in constants.STAFF_CHANNELS and with_role_check(ctx, constants.STAFF_ROLES):
                 description.append(await self.expanded_user_infraction_counts(user))
             else:
                 description.append(await self.basic_user_infraction_counts(user))
