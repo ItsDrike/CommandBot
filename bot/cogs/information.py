@@ -177,7 +177,7 @@ class Information(Cog):
             return
 
         # Prevent usage on someone with higher role
-        if not has_higher_role_check(ctx.author, user):
+        if not has_higher_role_check(ctx, user):
             embed = Embed(
                 color=constants.Colours.soft_red,
                 title=random.choice(constants.NEGATIVE_REPLIES),
@@ -235,7 +235,7 @@ class Information(Cog):
                 Roles: {roles or None}
             """).strip()
         ]
-        if has_higher_role_check(ctx.author, user):
+        if has_higher_role_check(ctx, user):
             # Show more verbose output in staff channels for infractions
             if ctx.channel.id in constants.STAFF_CHANNELS and with_role_check(ctx, *constants.STAFF_ROLES):
                 description.append(await self.expanded_user_infraction_counts(user))

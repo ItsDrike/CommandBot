@@ -42,22 +42,41 @@ def without_role_check(ctx: Context, *role_ids: int) -> bool:
 
 def in_channel_check(ctx: Context, *channel_ids: int) -> bool:
     """Checks if the command was executed inside the list of specified channels."""
+    if not ctx.guild:  # Return False in a DM
+        log.debug(f"{ctx.author} tried to use the '{ctx.command.name}' command from a DM. "
+                  "This command is restricted by the without_role decorator. Rejecting request.")
     check = ctx.channel.id in channel_ids
     log.debug(f"{ctx.author} tried to call the '{ctx.command.name}' command. "
               f"The result of the in_channel check was {check}.")
     return check
 
 
-def has_higher_role_check(check_user: Member, user: Member) -> bool:
+def has_higher_role_check(ctx: Context, user: Member) -> bool:
     """Check if user has higher (or same) role than other user"""
-    # Get all user roles
-    check_user_roles = [role.position for role in check_user.roles]
-    user_roles = [role.position for role in user.roles]
-    # Get highest role of users
-    check_user_max = max(check_user_roles)
-    user_max = max(user_roles)
+    if not ctx.guild:  # Return False in a DM
+        log.debug(f"{ctx.author} tried to use the '{ctx.command.name}' command from a DM. "
+                  "This command is restricted by the without_role decorator. Rejecting request.")
 
-    return check_user_max >= user_max
+    if not isinstance(user, Member):
+        log.debug(
+            "User is not a discord.Member; skipping role hierarchy check.")
+        return
+
+    check_user = ctx.author
+    cmd = ctx.command.name
+
+    if user.top_role > check_user.top_role:
+        log.info(
+            f"{check_user} ({check_user.id}) attempted to {cmd} "
+            f"{user} ({user.id}), who has an higher top role."
+        )
+        await ctx.send(
+            f":x: {check_user.mention}, you may not {cmd} "
+            "someone with an higher top role."
+        )
+        return False
+    else:
+        return True
 
 
 def cooldown_with_role_bypass(rate: int, per: float, type: BucketType = BucketType.default, *,
