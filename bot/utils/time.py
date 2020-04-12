@@ -6,7 +6,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 
 RFC1123_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
-INFRACTION_FORMAT = "%Y-%m-%d %H:%M"
 
 
 def _stringify_time_unit(value: int, unit: str) -> str:
@@ -106,49 +105,6 @@ async def wait_until(time: datetime.datetime, start: Optional[datetime.datetime]
     # Incorporate a small delay so we don't rapid-fire the event due to time precision errors
     if delay_seconds > 1.0:
         await asyncio.sleep(delay_seconds)
-
-
-def format_infraction(timestamp: str) -> str:
-    """Format an infraction timestamp to a more readable ISO 8601 format."""
-    return dateutil.parser.isoparse(timestamp).strftime(INFRACTION_FORMAT)
-
-
-def format_infraction_with_duration(
-    date_to: Optional[str],
-    date_from: Optional[datetime.datetime] = None,
-    max_units: int = 2,
-    absolute: bool = True
-) -> Optional[str]:
-    """
-    Return `date_to` formatted as a readable ISO-8601 with the humanized duration since `date_from`.
-
-    `date_from` must be an ISO-8601 formatted timestamp. The duration is calculated as from
-    `date_from` until `date_to` with a precision of seconds. If `date_from` is unspecified, the
-    current time is used.
-
-    `max_units` specifies the maximum number of units of time to include in the duration. For
-    example, a value of 1 may include days but not hours.
-
-    If `absolute` is True, the absolute value of the duration delta is used. This prevents negative
-    values in the case that `date_to` is in the past relative to `date_from`.
-    """
-    if not date_to:
-        return None
-
-    date_to_formatted = format_infraction(date_to)
-
-    date_from = date_from or datetime.datetime.utcnow()
-    date_to = dateutil.parser.isoparse(
-        date_to).replace(tzinfo=None, microsecond=0)
-
-    delta = relativedelta(date_to, date_from)
-    if absolute:
-        delta = abs(delta)
-
-    duration = humanize_delta(delta, max_units=max_units)
-    duration_formatted = f" ({duration})" if duration else ""
-
-    return f"{date_to_formatted}{duration_formatted}"
 
 
 def until_expiration(
