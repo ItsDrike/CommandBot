@@ -7,6 +7,7 @@ from discord import Colour, Embed, Message, TextChannel, User
 from discord.ext.commands import Cog, Context, group
 
 from bot.bot import Bot
+from bot.utils.checks import with_role_check
 from bot.decorators import with_role
 from bot.constants import (
     CleanMessages, NEGATIVE_REPLIES,
@@ -80,6 +81,16 @@ class Clean(Cog):
                 color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
                 description=f'You can clean maximum {CleanMessages.message_limit} messages.'
+            )
+            await ctx.send(embed=embed)
+            return
+
+        # Only MODERATION_ROLES can clean other channels
+        if channel != ctx.channel and not with_role_check(ctx, MODERATION_ROLES):
+            embed = Embed(
+                color=Colours.soft_red,
+                title=random.choice(NEGATIVE_REPLIES),
+                description=f'You can only use clean in the channel where you are'
             )
             await ctx.send(embed=embed)
             return
@@ -171,7 +182,6 @@ class Clean(Cog):
     @group(invoke_without_command=True, name='clean', aliases=['purge', 'clear'])
     @with_role(*STAFF_ROLES)
     async def clean_group(self, ctx: Context) -> None:
-        # TODO: Room protection if not MODERATION_ROLES
         '''Commands for cleaning messages in channels.'''
         await ctx.invoke(self.bot.get_command('help'), 'clean')
 
