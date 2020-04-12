@@ -152,7 +152,7 @@ class Information(Cog):
             user = ctx.author
 
         # Do a role check if this is being executed on someone other than the caller
-        elif user != ctx.author and not with_role_check(ctx, *constants.MODERATION_ROLES):
+        elif user != ctx.author and not with_role_check(ctx, *constants.STAFF_ROLES):
             await ctx.send("You may not use this command on users other than yourself.")
             return
 
@@ -219,11 +219,12 @@ class Information(Cog):
                 Roles: {roles or None}
             """).strip()
         ]
-        # Show more verbose output in moderation channels for infractions and nominations
-        if ctx.channel.id in constants.MODERATION_CHANNELS:
-            description.append(await self.expanded_user_infraction_counts(user))
-        else:
-            description.append(await self.basic_user_infraction_counts(user))
+        if has_higher_role_check(ctx.author, user):
+            # Show more verbose output in moderation channels for infractions and nominations
+            if ctx.channel.id in constants.MODERATION_CHANNELS:
+                description.append(await self.expanded_user_infraction_counts(user))
+            else:
+                description.append(await self.basic_user_infraction_counts(user))
 
         # Let's build the embed now
         embed = Embed(
