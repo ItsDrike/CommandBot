@@ -3,6 +3,8 @@ import logging
 from discord import Member
 from bot.database import SQLite
 from bot.constants import Time
+from bot.utils import time
+from dateutil.relativedelta import relativedelta
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +51,10 @@ class Infraction:
     @property
     def str_start(self) -> str:
         return datetime.datetime.strftime(self.start, Time.time_format)
+
+    @property
+    def str_duration(self) -> str:
+        return time.humanize_delta(relativedelta(seconds=self.duration))
 
     def get_dict(self) -> dict:
         return {
