@@ -77,7 +77,7 @@ class Clean(Cog):
         # Is this an acceptable amount of messages to clean?
         if amount > CleanMessages.message_limit:
             embed = Embed(
-                color=Colour.soft_red,
+                color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
                 description=f'You can clean maximum {CleanMessages.message_limit} messages.'
             )
