@@ -331,6 +331,10 @@ NEGATIVE_REPLIES = [
     "Huh? No.",
     "Nah.",
     "NEGATORY.",
+    "Not in my house!",
+    "Nuh-uh",
+    "Not in a million years.",
+    "Not likely."
 ]
 
 POSITIVE_REPLIES = [
@@ -344,6 +348,10 @@ POSITIVE_REPLIES = [
     "Alright.",
     "You got it!",
     "ROGER THAT",
+    "No problem.",
+    "Of course!",
+    "I got you.",
+    "Yeah okay.",
 ]
 
 ERROR_REPLIES = [
