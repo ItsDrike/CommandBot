@@ -39,7 +39,7 @@ class ErrorHandler(Cog):
         command = ctx.command
 
         if hasattr(e, "handled"):
-            log.trace(
+            log.debug(
                 f"Command {command} had its error already handled locally; ignoring.")
             return
 
