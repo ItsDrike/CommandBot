@@ -100,7 +100,6 @@ class ErrorHandler(Cog):
         * ArgumentParsingError: send an error message
         * Other: send an error message and the help command
         """
-        # TODO: use ctx.send_help() once PR #519 is merged.
         help_command = await self.get_help_command(ctx.command)
 
         if isinstance(e, errors.MissingRequiredArgument):
