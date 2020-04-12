@@ -85,8 +85,12 @@ class Clean(Cog):
             await ctx.send(embed=embed)
             return
 
+        # Default to using the invoking context's channel
+        if not channel:
+            channel = ctx.channel
+
         # Only MODERATION_ROLES can clean other channels
-        if channel != ctx.channel and not with_role_check(ctx, MODERATION_ROLES):
+        if channel != ctx.channel and not with_role_check(ctx, *MODERATION_ROLES):
             embed = Embed(
                 color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
@@ -114,10 +118,6 @@ class Clean(Cog):
             predicate = predicate_regex          # Delete messages that match regex
         else:
             predicate = None                     # Delete all messages
-
-        # Default to using the invoking context's channel
-        if not channel:
-            channel = ctx.channel
 
         # Look through the history and retrieve message data
         messages = []
