@@ -17,6 +17,7 @@ class Infraction:
                  reason: str,
                  start: datetime.datetime,
                  duration: int,
+                 rowid: int = None,
                  write_to_db: bool = False
                  ) -> None:
 
@@ -33,6 +34,7 @@ class Infraction:
 
         self.duration = duration
         self.stop = self.start + datetime.timedelta(0, self.duration)
+        self.id = rowid
         if write_to_db:
             self.add_to_database()
 
@@ -81,7 +83,7 @@ def get_infractions(user: Member) -> list:
 
     # Get all infractions from database
     db = SQLite()
-    db.execute(f'SELECT * FROM infractions WHERE UID={user.id}')
+    db.execute(f'SELECT *, rowid FROM infractions WHERE UID={user.id}')
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
