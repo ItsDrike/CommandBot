@@ -326,9 +326,10 @@ class Information(Cog):
 
             line = '```yaml\n'
             for infraction_type in sorted(infraction_types):
-                line += f'{infraction_type}s:\n'
+                infractions_amt = len(infractions_dict[infraction_type])
+                line += f'{infraction_type}s: {infractions_amt}\n'
                 for infraction in infractions_dict[infraction_type]:
-                    line += f'  {(infraction.reason).replace(" ", "_")}:\n'
+                    line += f'  {(infraction.reason).replace(" ", "_")}: (ID: {infraction.id})\n'
                     # TODO: Time conversion (mins, hours, days, etc..)
                     line += f'      duration: {infraction.duration} seconds\n'
                     line += f'      time: {infraction.str_start}\n'
@@ -350,6 +351,7 @@ class Information(Cog):
                 infraction_output.append(
                     "This user has no active infractions.")
             else:
+                infraction_output.append(f'TOTAL: {len(active_infs)}')
                 infraction_output.append(
                     get_infractions_by_type(active_infs))
             infraction_output.append("**Inactive Infractions**")
@@ -357,6 +359,7 @@ class Information(Cog):
                 infraction_output.append(
                     "This user has no inactive infractions.")
             else:
+                infraction_output.append(f'TOTAL: {len(inactive_infs)}')
                 infraction_output.append(
                     get_infractions_by_type(inactive_infs))
 
