@@ -188,7 +188,13 @@ class Information(Cog):
 
         embed = await self.create_infractions_embed(ctx, user)
 
-        await ctx.send(embed=embed)
+        # Send infractions as DM, if user has any (bypass for staff members)
+        if not with_role_check(ctx, *constants.STAFF_ROLES) and not len(infractions.get_infractions(user)) == 0:
+            msg = f'Your infraction list was sent to you by DM, {user.mention}'
+            await user.send(embed=embed)
+            await ctx.send(msg)
+        else:
+            await ctx.send(embed=embed)
 
     async def create_user_embed(self, ctx: Context, user: Member) -> Embed:
         """Creates an embed containing information on the `user`."""
@@ -226,7 +232,7 @@ class Information(Cog):
         ]
         if has_higher_role_check(ctx.author, user):
             # Show more verbose output in staff channels for infractions
-            if ctx.channel.id in constants.STAFF_CHANNELS and with_role_check(ctx, constants.STAFF_ROLES):
+            if ctx.channel.id in constants.STAFF_CHANNELS and with_role_check(ctx, *constants.STAFF_ROLES):
                 description.append(await self.expanded_user_infraction_counts(user))
             else:
                 description.append(await self.basic_user_infraction_counts(user))
