@@ -1,5 +1,6 @@
 import colorsys
 import logging
+import random
 import textwrap
 from collections import Counter, defaultdict
 from string import Template
@@ -9,14 +10,13 @@ from discord import Colour, Embed, Member, Role, Status, utils
 from discord.ext.commands import Cog, Context, command
 from discord.utils import escape_markdown
 
+import bot.utils.infractions as infractions
 from bot import constants
 from bot.bot import Bot
 from bot.decorators import InChannelCheckFailure, with_role
 from bot.pagination import LinePaginator
-from bot.utils.checks import with_role_check, has_higher_role_check
+from bot.utils.checks import has_higher_role_check, with_role_check
 from bot.utils.time import time_since
-import bot.utils.infractions as infractions
-
 
 log = logging.getLogger(__name__)
 
@@ -178,7 +178,12 @@ class Information(Cog):
 
         # Prevent usage on someone with higher role
         if not has_higher_role_check(ctx.author, user):
-            await ctx.send('You may not use this command on users with higher role than yours')
+            embed = Embed(
+                color=constants.Colours.soft_red,
+                title=random.choice(constants.NEGATIVE_REPLIES),
+                description=f'You may not use this command on users with higher role than yours'
+            )
+            await ctx.send(embed=embed)
             return
 
         # Non-staff may only do this in #bot-commands
