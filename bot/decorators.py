@@ -6,13 +6,13 @@ from functools import wraps
 from typing import Callable, Container, Union
 from weakref import WeakValueDictionary
 
-from discord import Colour, Embed, Member
+from discord import Colour, Embed
 from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import CheckFailure, Cog, Context
 
 from bot.constants import ERROR_REPLIES, RedirectOutput
-from bot.utils.checks import with_role_check, without_role_check
+from bot.utils.checks import with_role_check, without_role_check, has_higher_role_check
 
 log = logging.getLogger(__name__)
 
@@ -178,6 +178,7 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
     def wrap(func: Callable) -> Callable:
         @wraps(func)
         async def inner(self: Cog, ctx: Context, *args, **kwargs) -> None:
+            # Find the target in args or kwargs based on target_arg
             try:
                 target = kwargs[target_arg]
             except KeyError:
@@ -190,24 +191,7 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
                     raise ValueError(
                         f"Could not find target kwarg with key {target_arg!r}")
 
-            if not isinstance(target, Member):
-                log.debug(
-                    "The target is not a discord.Member; skipping role hierarchy check.")
-                await func(self, ctx, *args, **kwargs)
-                return
-
-            cmd = ctx.command.name
-            actor = ctx.author
-            if target.top_role >= actor.top_role:
-                log.info(
-                    f"{actor} ({actor.id}) attempted to {cmd} "
-                    f"{target} ({target.id}), who has an equal or higher top role."
-                )
-                await ctx.send(
-                    f":x: {actor.mention}, you may not {cmd} "
-                    "someone with an equal or higher top role."
-                )
-            else:
+            if has_higher_role_check(ctx, target):
                 await func(self, ctx, *args, **kwargs)
         return inner
     return wrap
