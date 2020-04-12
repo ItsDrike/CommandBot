@@ -335,9 +335,8 @@ class Information(Cog):
                 line += f'{infraction_type}s: {infractions_amt}\n'
                 for infraction in infractions_dict[infraction_type]:
                     line += f'  {(infraction.reason).replace(" ", "_")}: (ID: {infraction.id})\n'
-                    # TODO: Time conversion (mins, hours, days, etc..)
-                    line += f'      duration: {infraction.duration} seconds\n'
-                    line += f'      time: {infraction.str_start}\n'
+                    line += f'      duration: {infraction.str_duration}\n'
+                    line += f'      given: {infraction.time_since_start}\n'
             line = line[:-1]
             line += '```'
 

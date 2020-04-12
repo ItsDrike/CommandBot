@@ -9,9 +9,6 @@ from dateutil.relativedelta import relativedelta
 log = logging.getLogger(__name__)
 
 
-str(datetime.datetime)
-
-
 class Infraction:
     def __init__(self,
                  user_id: int,
@@ -55,6 +52,10 @@ class Infraction:
     @property
     def str_duration(self) -> str:
         return time.humanize_delta(relativedelta(seconds=self.duration))
+
+    @property
+    def time_since_start(self) -> str:
+        return time.time_since(self.start, max_units=2)
 
     def get_dict(self) -> dict:
         return {
