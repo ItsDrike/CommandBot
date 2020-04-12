@@ -181,6 +181,11 @@ class Information(Cog):
             await ctx.send('You may not use this command on users with higher role than yours')
             return
 
+        # Non-staff may only do this in #bot-commands
+        if not with_role_check(ctx, *constants.STAFF_ROLES):
+            if not ctx.channel.id == constants.Channels.commands:
+                raise InChannelCheckFailure(constants.Channels.commands)
+
         embed = await self.create_infractions_embed(ctx, user)
 
         await ctx.send(embed=embed)
