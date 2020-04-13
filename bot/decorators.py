@@ -28,6 +28,16 @@ class InChannelCheckFailure(CheckFailure):
             f"Sorry, but you may only use this command within {channels_str}.")
 
 
+class PermissionCheckFailure(CheckFailure):
+    """Raised when a check fails because author does not have sufficient permissions"""
+
+    def __init__(self, ctx: Context):
+        self.command = ctx.command
+
+        super().__init__(
+            f"Sorry, but you don't have permission to use {self.command} command.")
+
+
 def in_channel(
     *channels: int,
     hidden_channels: Container[int] = None,
@@ -68,14 +78,18 @@ def with_role(*role_ids: int) -> Callable:
     """Returns True if the user has any one of the roles in role_ids."""
     async def predicate(ctx: Context) -> bool:
         """With role checker predicate."""
-        return with_role_check(ctx, *role_ids)
+        if with_role_check(ctx, *role_ids):
+            return True
+        raise PermissionCheckFailure(ctx)
     return commands.check(predicate)
 
 
 def without_role(*role_ids: int) -> Callable:
     """Returns True if the user does not have any of the roles in role_ids."""
     async def predicate(ctx: Context) -> bool:
-        return without_role_check(ctx, *role_ids)
+        if without_role_check(ctx, *role_ids):
+            return True
+        raise PermissionCheckFailure(ctx)
     return commands.check(predicate)
 
 

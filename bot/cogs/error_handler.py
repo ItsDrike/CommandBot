@@ -5,7 +5,7 @@ from discord.ext.commands import Cog, Command, Context, errors
 from sentry_sdk import push_scope
 
 from bot.bot import Bot
-from bot.decorators import InChannelCheckFailure
+from bot.decorators import InChannelCheckFailure, PermissionCheckFailure
 
 log = logging.getLogger(__name__)
 
@@ -131,6 +131,7 @@ class ErrorHandler(Cog):
         * BotMissingAnyRole
         * NoPrivateMessage
         * InChannelCheckFailure
+        * PermissionCheckFailure
         """
         bot_missing_errors = (
             errors.BotMissingPermissions,
@@ -138,11 +139,17 @@ class ErrorHandler(Cog):
             errors.BotMissingAnyRole
         )
 
+        user_errors = (
+            InChannelCheckFailure,
+            PermissionCheckFailure,
+            errors.NoPrivateMessage
+        )
+
         if isinstance(e, bot_missing_errors):
             await ctx.send(
                 f"Sorry, it looks like I don't have the permissions or roles I need to do that."
             )
-        elif isinstance(e, (InChannelCheckFailure, errors.NoPrivateMessage)):
+        elif isinstance(e, user_errors):
             await ctx.send(e)
 
     @staticmethod
