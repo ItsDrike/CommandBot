@@ -7,8 +7,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from discord.ext.commands import Converter, BadArgument
 
-RFC1123_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
-
 
 def _stringify_time_unit(value: int, unit: str) -> str:
     """
@@ -86,11 +84,6 @@ def time_since(past_datetime: datetime.datetime, precision: str = "seconds", max
     humanized = humanize_delta(delta, precision, max_units)
 
     return f"{humanized} ago"
-
-
-def parse_rfc1123(stamp: str) -> datetime.datetime:
-    """Parse RFC1123 time string into datetime."""
-    return datetime.datetime.strptime(stamp, RFC1123_FORMAT).replace(tzinfo=datetime.timezone.utc)
 
 
 # Hey, this could actually be used in the off_topic_names and reddit cogs :)
