@@ -53,14 +53,16 @@ def in_channel_check(ctx: Context, *channel_ids: int) -> bool:
 
 def has_higher_role_check(ctx: Context, user: Member) -> bool:
     """Check if user has higher (or same) role than other user"""
+
     if not ctx.guild:  # Return False in a DM
-        log.debug(f"{ctx.author} tried to use the '{ctx.command.name}' command from a DM. "
-                  "This command is restricted by the without_role decorator. Rejecting request.")
+        log.info(f"{ctx.author} tried to use the '{ctx.command.name}' command from a DM. "
+                 "This command is restricted by the without_role decorator. Rejecting request.")
+        return False
 
     if not isinstance(user, Member):
-        log.debug(
+        log.info(
             "User is not a discord.Member; skipping role hierarchy check.")
-        return
+        return False
 
     check_user = ctx.author
     cmd = ctx.command.name
@@ -69,10 +71,6 @@ def has_higher_role_check(ctx: Context, user: Member) -> bool:
         log.info(
             f"{check_user} ({check_user.id}) attempted to {cmd} "
             f"{user} ({user.id}), who has an higher top role."
-        )
-        await ctx.send(
-            f":x: {check_user.mention}, you may not {cmd} "
-            "someone with an higher top role."
         )
         return False
     else:

@@ -3,11 +3,11 @@ import logging
 import re
 from typing import Optional
 
-from discord import Colour, Embed, Message, TextChannel, User
+from discord import Colour, Embed, Message, TextChannel, User, Member
 from discord.ext.commands import Cog, Context, group
 
 from bot.bot import Bot
-from bot.utils.checks import with_role_check
+from bot.utils.checks import with_role_check, has_higher_role_check
 from bot.decorators import with_role
 from bot.constants import (
     CleanMessages, NEGATIVE_REPLIES,
@@ -190,12 +190,18 @@ class Clean(Cog):
     async def clean_user(
         self,
         ctx: Context,
-        user: User,
+        user: Member,
         amount: Optional[int] = 10,
         channel: TextChannel = None
     ) -> None:
         '''Delete messages posted by the provided user, stop cleaning after traversing `amount` messages.'''
-        await self._clean_messages(amount, ctx, user=user, channel=channel)
+        if has_higher_role_check(ctx, user):
+            await self._clean_messages(amount, ctx, user=user, channel=channel)
+        else:
+            await ctx.send(
+                f":x: {ctx.author.mention}, you may not {ctx.command.name} "
+                "someone with an equal or higher top role."
+            )
 
     @clean_group.command(name='all', aliases=['everything'])
     @with_role(*MODERATION_ROLES)
@@ -220,7 +226,7 @@ class Clean(Cog):
         await self._clean_messages(amount, ctx, bots_only=True, channel=channel)
 
     @clean_group.command(name='regex', aliases=['word', 'expression'])
-    @with_role(*STAFF_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def clean_regex(
         self,
         ctx: Context,
