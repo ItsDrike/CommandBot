@@ -74,10 +74,9 @@ class Information(Cog):
             parsed_roles.append(role)
 
         if failed_roles:
-            await ctx.send(
-                ":x: I could not convert the following role names to a role: \n- "
-                "\n- ".join(failed_roles)
-            )
+            msg = ':x: I could not convert the following role names to a role: \n-'
+            msg += '\n-'.join(failed_roles)
+            await ctx.send(msg)
 
         for role in parsed_roles:
             h, s, v = colorsys.rgb_to_hsv(*role.colour.to_rgb())
