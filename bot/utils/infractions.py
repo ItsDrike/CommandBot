@@ -53,7 +53,10 @@ class Infraction:
 
     @property
     def str_duration(self) -> str:
-        return time.humanize_delta(relativedelta(seconds=self.duration))
+        duration = time.humanize_delta(relativedelta(seconds=self.duration))
+        if duration == 'less than a second':
+            duration = 'instant'
+        return duration
 
     @property
     def time_since_start(self) -> str:
