@@ -71,7 +71,7 @@ class ErrorHandler(Cog):
         Send an error message in 'ctx' for CommandNotFound error
         '''
         log.debug(
-            f"{ctx.author} tried to use an invalid command"
+            f"{ctx.author} tried to use an invalid command ({ctx.command})"
         )
         await ctx.send(f'Command not found, use !help for help')
 
