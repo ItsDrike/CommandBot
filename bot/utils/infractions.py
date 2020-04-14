@@ -59,19 +59,6 @@ class Infraction:
     def time_since_start(self) -> str:
         return time.time_since(self.start, max_units=2)
 
-    def get_dict(self) -> dict:
-        return {
-            'user_id': self.user_id,
-            'type': self.type,
-            'reason': self.reason,
-            'start': str(self.start),
-            'duration': self.duration
-        }
-
-    def __iter__(self):
-        for key, value in self.get_dict().items():
-            yield key, value
-
     def add_to_database(self) -> None:
         '''Add infraction to the database'''
         log.debug(
