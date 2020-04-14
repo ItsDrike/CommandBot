@@ -24,6 +24,7 @@ class SQLite():
                             UID INTEGER,
                             Type TEXT,
                             Reason TEXT,
+                            ActorID INTEGER,
                             Start TEXT,
                             Duration INTEGER
                             );''')
