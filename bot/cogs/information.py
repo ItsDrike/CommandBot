@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 from string import Template
 from typing import Any, Mapping, Optional, Union
 
-from discord import Colour, Embed, Member, Role, Status, utils
+from discord import Colour, Embed, Member, Role, Status, utils, Guild
 from discord.ext.commands import Cog, Context, command
 from discord.utils import escape_markdown
 
@@ -330,7 +330,7 @@ class Information(Cog):
         The counts will be split by `active` status and infraction `type`
         """
 
-        def get_infractions_by_type(all_infractions: list) -> dict:
+        def get_infractions_by_type(guild: Guild, all_infractions: list) -> dict:
             infraction_types = set()
             infractions_dict = defaultdict(list)
             for infraction in all_infractions:
@@ -344,9 +344,18 @@ class Information(Cog):
                 infractions_amt = len(infractions_dict[infraction_type])
                 line += f'{infraction_type}s: {infractions_amt}\n'
                 for infraction in infractions_dict[infraction_type]:
-                    line += f'  {(infraction.reason).replace(" ", "_")}: (ID: {infraction.id})\n'
+                    # Get actors name if possible
+                    actor = guild.get_member(infraction.actor_id)
+                    if not isinstance(actor, Member):
+                        actor = infraction.actor_id
+                    else:
+                        actor = f'{actor.name}#{actor.discriminator}'
+
+                    line += f'  - {(infraction.reason)}\n'
+                    line += f'      ID: {infraction.id}\n'
                     line += f'      duration: {infraction.str_duration}\n'
                     line += f'      given: {infraction.time_since_start}\n'
+                    line += f'      actor: {actor}\n'
             line = line[:-1]
             line += '```'
 
@@ -354,6 +363,7 @@ class Information(Cog):
 
         active_infs = infractions.get_active_infractions(member)
         inactive_infs = infractions.get_inactive_infractions(member)
+        guild = member.guild
 
         if not active_infs and not inactive_infs:
             infraction_output = ["**Infractions**"]
@@ -367,7 +377,7 @@ class Information(Cog):
             else:
                 infraction_output.append(f'TOTAL: {len(active_infs)}')
                 infraction_output.append(
-                    get_infractions_by_type(active_infs))
+                    get_infractions_by_type(guild, active_infs))
             infraction_output.append("**Inactive Infractions**")
             if not inactive_infs:
                 infraction_output.append(
@@ -375,7 +385,7 @@ class Information(Cog):
             else:
                 infraction_output.append(f'TOTAL: {len(inactive_infs)}')
                 infraction_output.append(
-                    get_infractions_by_type(inactive_infs))
+                    get_infractions_by_type(guild, inactive_infs))
 
         return '\n'.join(infraction_output)
 
