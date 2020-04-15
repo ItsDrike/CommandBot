@@ -62,7 +62,7 @@ def has_higher_role_check(ctx: Context, user: Member) -> bool:
     if not isinstance(user, Member):
         log.info(
             "User is not a discord.Member; skipping role hierarchy check.")
-        return False
+        return True
 
     check_user = ctx.author
     cmd = ctx.command.name
