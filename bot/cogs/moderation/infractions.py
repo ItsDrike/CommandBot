@@ -129,7 +129,7 @@ class Infractions(commands.Cog):
                 # Make force pardon in case there are more infractions (discord logs only 1 ban)
                 force = True
 
-            await ctx.send(f'User {user} ({user.id}) was unbanned sucessfully')
+            await ctx.send(f'User {user} ({user.id}) was unbanned successfully')
 
         else:
             # Build an embed
