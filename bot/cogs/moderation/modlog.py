@@ -14,6 +14,7 @@ from discord.utils import escape_markdown
 
 from bot.constants import Channels, Colours, Emojis, Event, Guild as GuildConstant, Icons
 from bot.utils.time import humanize_delta
+from bot.utils import infractions
 
 log = logging.getLogger(__name__)
 
@@ -339,6 +340,12 @@ class ModLog(Cog, name="ModLog"):
         if member.id in self._ignored[Event.member_unban]:
             self._ignored[Event.member_unban].remove(member.id)
             return
+
+        # Pardon active ban infraction(s)
+        infs = infractions.get_active_infractions(
+            member, inf_type='ban')
+        for infraction in infs:
+            await infraction.pardon(guild, member, force=True)
 
         member_str = escape_markdown(str(member))
         await self.send_log_message(

@@ -1,10 +1,11 @@
 import datetime
 import logging
-from discord import Member
+from discord import Guild, User
 from bot.database import SQLite
 from bot.constants import Time
 from bot.utils import time
 from dateutil.relativedelta import relativedelta
+from bot.utils.converters import FetchedMember
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class Infraction:
                  actor_id: int,
                  start: datetime.datetime,
                  duration: int,
+                 active: int = None,
                  rowid: int = None,
                  write_to_db: bool = False
                  ) -> None:
@@ -35,6 +37,10 @@ class Infraction:
 
         self.duration = duration
         self.stop = self.start + datetime.timedelta(0, self.duration)
+        if not active:
+            self.is_active = self.active
+        else:
+            self.is_active = bool(active)
         self.id = rowid
         if write_to_db:
             self.add_to_database()
@@ -42,7 +48,7 @@ class Infraction:
     @property
     def active(self) -> bool:
         '''Determine if infraction is currently active'''
-        if datetime.datetime.now() > self.stop:
+        if datetime.datetime.now() > self.stop and self.duration != 1_000_000_000:
             return False
         else:
             return True
@@ -53,7 +59,10 @@ class Infraction:
 
     @property
     def str_duration(self) -> str:
-        duration = time.humanize_delta(relativedelta(seconds=self.duration))
+        if self.duration == 1_000_000_000:
+            return 'permanent'
+        duration = time.humanize_delta(
+            relativedelta(seconds=self.duration), max_units=2)
         if duration == 'less than a second':
             duration = 'instant'
         return duration
@@ -65,19 +74,65 @@ class Infraction:
     def add_to_database(self) -> None:
         '''Add infraction to the database'''
         log.debug(
-            f'Adding infraction {self.type} to {self.user_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]')
+            f'Adding infraction {self.type} to {self.user_id} by {self.actor_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]')
 
         sql_command = f'''INSERT INTO infractions VALUES(
-                        {self.user_id}, "{self.type}",
-                        "{self.reason}", "{self.actor_id}", "{self.str_start}", {self.duration}
+                        {self.user_id}, "{self.type}", "{self.reason}", "{self.actor_id}",
+                        "{self.str_start}", {self.duration}, {self.is_active}
                         );
                         '''
         db = SQLite()
         db.execute(sql_command)
         db.close()
 
+    def make_inactive(self) -> None:
+        '''Set infraction Active state to 0 in database'''
+        log.debug(
+            f'Deactivating infraction {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]')
 
-def get_infractions(user: Member) -> list:
+        sql_command = f'''UPDATE infractions SET Active=0 WHERE rowid={self.id};'''
+
+        db = SQLite()
+        db.execute(sql_command)
+        db.close()
+
+    async def pardon(self, guild: Guild, user: User, force: bool = False) -> None:
+        # Ignore already pardoned infractions
+        if not self.is_active:
+            return
+
+        if self.user_id != user.id:
+            log.warning(
+                f'Invalid pardon, given user is not the infraction user')
+            return
+
+        if not force:
+            if self.type == 'ban':
+                log.info(f'User {user} ({user.id}) has been unbanned')
+                print(f'Found {user} to unban')
+                await guild.unban(user)
+        self.make_inactive()
+
+
+def get_all_active_infractions(inf_type: str = None) -> list:
+    log.debug(f'Getting all active infractions')
+
+    # Get all infractions from database
+    db = SQLite()
+    db.execute(f'SELECT *, rowid FROM infractions WHERE Active=1;')
+    infractions = [infraction for infraction in db.cur.fetchall()]
+    db.close()
+
+    # Convert infractions to Infraction class
+    all_infractions = [Infraction(*infraction) for infraction in infractions]
+
+    if inf_type:
+        return [infraction for infraction in all_infractions if infraction.type == inf_type]
+    else:
+        return all_infractions
+
+
+def get_infractions(user: FetchedMember, inf_type: str = None) -> list:
     log.debug(f'Getting infractions of {user}')
 
     # Get all infractions from database
@@ -87,14 +142,64 @@ def get_infractions(user: Member) -> list:
     db.close()
 
     # Convert infractions to Infraction class
-    return [Infraction(*infraction) for infraction in infractions]
+    all_infractions = [Infraction(*infraction) for infraction in infractions]
+
+    if inf_type:
+        return [infraction for infraction in all_infractions if infraction.type == inf_type]
+    else:
+        return all_infractions
 
 
-def get_active_infractions(user: Member) -> list:
-    infractions = get_infractions(user)
-    return [infraction for infraction in infractions if infraction.active]
+def get_active_infractions(user: FetchedMember, inf_type: str = None) -> list:
+    log.debug(f'Getting active infractions of {user}')
+
+    # Get all infractions from database
+    db = SQLite()
+    db.execute(
+        f'SELECT *, rowid FROM infractions WHERE UID={user.id} AND Active=1')
+    infractions = [infraction for infraction in db.cur.fetchall()]
+    db.close()
+
+    # Convert infractions to Infraction class
+    all_infractions = [Infraction(*infraction) for infraction in infractions]
+
+    if inf_type:
+        return [infraction for infraction in all_infractions if infraction.type == inf_type]
+    else:
+        return all_infractions
 
 
-def get_inactive_infractions(user: Member) -> list:
-    infractions = get_infractions(user)
-    return [infraction for infraction in infractions if not infraction.active]
+def get_inactive_infractions(user: FetchedMember, inf_type: str = None) -> list:
+    log.debug(f'Getting inactive infractions of {user}')
+
+    # Get all infractions from database
+    db = SQLite()
+    db.execute(
+        f'SELECT *, rowid FROM infractions WHERE UID={user.id} AND Active=0')
+    infractions = [infraction for infraction in db.cur.fetchall()]
+    db.close()
+
+    # Convert infractions to Infraction class
+    all_infractions = [Infraction(*infraction) for infraction in infractions]
+
+    if inf_type:
+        return [infraction for infraction in all_infractions if infraction.type == inf_type]
+    else:
+        return all_infractions
+
+
+async def pardon_last_infraction(guild: Guild, user: FetchedMember, inf_type: str = None, force: bool = False) -> None:
+    # Get all active infractions of given user
+    infractions = get_active_infractions(user, inf_type)
+    # Pardon last infraction
+    await infractions[-1].pardon(guild, force=force)
+
+
+async def check_infractions_expiry(guild: Guild, inf_type: str = None) -> None:
+    active_infractions = get_all_active_infractions(inf_type=inf_type)
+
+    for infraction in active_infractions:
+        # Check if infraction is no longer active by duration
+        if not infraction.active:
+            # Infraction expired, de-activate it
+            await infraction.pardon(guild)

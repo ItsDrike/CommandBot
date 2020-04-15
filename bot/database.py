@@ -26,7 +26,8 @@ class SQLite():
                             Reason TEXT,
                             ActorID INTEGER,
                             Start TEXT,
-                            Duration INTEGER
+                            Duration INTEGER,
+                            Active INTEGER
                             );''')
             self.execute('''CREATE TABLE users(
                             UID INTEGER,

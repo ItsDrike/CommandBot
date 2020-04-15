@@ -10,9 +10,13 @@ from discord.ext.commands.errors import BotMissingPermissions
 
 from bot import constants
 from bot.bot import Bot
+from bot.constants import Event
 from bot.decorators import with_role
 from bot.utils import infractions
 from bot.utils.checks import has_higher_role_check
+from bot.utils.converters import FetchedMember
+
+from .modlog import ModLog
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +24,11 @@ log = logging.getLogger(__name__)
 class Infractions(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+
+    @property
+    def mod_log(self) -> ModLog:
+        """Get currently loaded ModLog cog instance."""
+        return self.bot.get_cog("ModLog")
 
     async def check_bot(self, ctx: Context, user: Member, command: str) -> bool:
         """Check user is not a bot"""
@@ -51,12 +60,11 @@ class Infractions(commands.Cog):
 
     @with_role(*constants.STAFF_ROLES)
     @command(name='warn', aliases=['infraction'])
-    async def warn(self, ctx: Context, user: Member, *, reason: str = None) -> None:
+    async def warn(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
         """Warn a user for a given reason"""
-
-        if self.check_bot(ctx, user, 'warn'):
+        if await self.check_bot(ctx, user, 'warn'):
             return
-        if not self.check_role(ctx, user, 'warn'):
+        if not await self.check_role(ctx, user, 'warn'):
             return
 
         infractions.Infraction(
@@ -76,15 +84,58 @@ class Infractions(commands.Cog):
 
         infractions.Infraction(
             user.id, 'kick', reason, ctx.author.id, datetime.now(), 0, write_to_db=True)
+
+        self.mod_log.ignore(Event.member_remove, user.id)
+
         try:
             await ctx.guild.kick(user, reason=reason)
             await ctx.send(f':exclamation:User {user.mention} has been kicked ({reason})')
         except Forbidden:
             raise BotMissingPermissions('kick')
-            # # Build an embed
-            # embed = Embed(
-            #     title=random.choice(constants.ERROR_REPLIES),
-            #     description=f"I do not have permission to kick this user",
-            #     colour=constants.Colours.soft_red
-            # )
-            # await ctx.send(embed=embed)
+
+    @with_role(*constants.MODERATION_ROLES)
+    @command()
+    async def ban(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
+        """Permanently ban a user for the given reason"""
+
+        if await self.check_bot(ctx, user, 'ban'):
+            return
+        if not await self.check_role(ctx, user, 'ban'):
+            return
+
+        self.mod_log.ignore(Event.member_remove, user.id)
+
+        try:
+            await ctx.guild.ban(user, reason=reason)
+
+            # Give ban infraction with 100 years time (can't use infinity)
+            infractions.Infraction(
+                user.id, 'ban', reason, ctx.author.id, datetime.now(), 1_000_000_000, write_to_db=True)
+
+            await ctx.send(f':exclamation:User {user.mention} has been permanently banned ({reason})')
+        except Forbidden:
+            raise BotMissingPermissions('ban')
+
+    @with_role(*constants.MODERATION_ROLES)
+    @command()
+    async def unban(self, ctx: Context, user: FetchedMember) -> None:
+        infs = infractions.get_active_infractions(user, inf_type='ban')
+        if len(infs) >= 1:
+            log.info(f'User {user} was unbanned by {ctx.author}')
+
+            force = False
+            for infraction in infs:
+                await infraction.pardon(ctx.guild, user, force=force)
+                # Make force pardon in case there are more infractions (discord logs only 1 ban)
+                force = True
+
+            await ctx.send(f'User {user} ({user.id}) was unbanned sucessfully')
+
+        else:
+            # Build an embed
+            embed = Embed(
+                title=random.choice(constants.NEGATIVE_REPLIES),
+                description=f"This user is not banned",
+                colour=constants.Colours.soft_red
+            )
+            await ctx.send(embed=embed)
