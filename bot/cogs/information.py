@@ -201,6 +201,56 @@ class Information(Cog):
         else:
             await ctx.send(embed=embed)
 
+    @with_role(*constants.STAFF_ROLES)
+    @command()
+    async def infraction(self, ctx: Context, infraction_id: int) -> None:
+        """Provide detailed info about single infraction"""
+        infraction = infractions.get_infraction_by_row(infraction_id)
+
+        if infraction:
+            user = ctx.guild.get_member(infraction.user_id)
+            if not user:
+                user = infraction.user_id
+            else:
+                # Preform a role check if the user is found
+                if not has_higher_role_check(ctx, user):
+                    embed = Embed(
+                        title=random.choice(constants.NEGATIVE_REPLIES),
+                        description="You don't have permission to access this infraction",
+                        colour=constants.Colours.soft_red
+                    )
+                    await ctx.send(embed=embed)
+                    return
+
+            actor = ctx.guild.get_member(infraction.actor_id)
+            if not actor:
+                actor = infraction.actor_id
+
+            description = textwrap.dedent(f"""
+            **Infraction Details**
+            ID: {infraction_id}
+            Given to: {user}
+            Type: {infraction.type}
+            Reason: {infraction.reason}
+            Actor: {actor}
+            Duration: {infraction.str_duration}
+            Given: {infraction.str_start}
+            """).strip()
+
+            embed = Embed(
+                title=random.choice(constants.POSITIVE_REPLIES),
+                description=description,
+                colour=Colour.blurple()
+            )
+        else:
+            embed = Embed(
+                title=random.choice(constants.NEGATIVE_REPLIES),
+                description="No such infraction",
+                colour=constants.Colours.soft_red
+            )
+
+        await ctx.send(embed=embed)
+
     async def create_user_embed(self, ctx: Context, user: FetchedMember) -> Embed:
         """Creates an embed containing information on the `user`."""
         created = time_since(user.created_at, max_units=3)
