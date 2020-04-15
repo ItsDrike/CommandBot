@@ -167,6 +167,7 @@ class Channels(metaclass=YAMLGetter):
 
     attachment_log: int
     message_log: int
+    voice_log: int
     user_log: int
     mod_log: int
 

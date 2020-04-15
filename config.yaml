@@ -26,6 +26,7 @@ guild:
         # Logs
         attachment_log:     &ATTACH_LOG     697818158265794770
         message_log:        &MESSAGE_LOG    697818175118770176
+        voice_log:          &VOICE_LOG      699917008401203310
         user_log:                           697818221537132564
         mod_log:            &MOD_LOG        697818242781151232
 
@@ -42,6 +43,7 @@ guild:
         - *ADMINS
         - *ATTACH_LOG
         - *MESSAGE_LOG
+        - *VOICE_LOG
         - *MOD_LOG
 
     roles:
