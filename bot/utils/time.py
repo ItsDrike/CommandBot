@@ -76,7 +76,7 @@ def time_since(past_datetime: datetime.datetime, precision: str = "seconds", max
     precision specifies the smallest unit of time to include (e.g. "seconds", "minutes").
     max_units specifies the maximum number of units of time to include (e.g. 1 may include days but not hours).
     """
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now()
     delta = abs(relativedelta(now, past_datetime))
 
     humanized = humanize_delta(delta, precision, max_units)
