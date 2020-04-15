@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 from string import Template
 from typing import Any, Mapping, Optional, Union
 
-from discord import Colour, Embed, Member, Role, Status, utils, Guild
+from discord import Colour, Embed, Guild, Member, Role, Status, utils
 from discord.ext.commands import Cog, Context, command
 from discord.utils import escape_markdown
 
@@ -16,6 +16,7 @@ from bot.bot import Bot
 from bot.decorators import InChannelCheckFailure, with_role
 from bot.pagination import LinePaginator
 from bot.utils.checks import has_higher_role_check, with_role_check
+from bot.utils.converters import FetchedMember
 from bot.utils.time import time_since
 
 log = logging.getLogger(__name__)
@@ -145,7 +146,7 @@ class Information(Cog):
         await ctx.send(embed=embed)
 
     @command(name="user", aliases=["user_info", "member", "member_info"])
-    async def user_info(self, ctx: Context, user: Member = None) -> None:
+    async def user_info(self, ctx: Context, user: FetchedMember = None) -> None:
         """Returns info about a user."""
         if user is None:
             user = ctx.author
@@ -165,7 +166,7 @@ class Information(Cog):
         await ctx.send(embed=embed)
 
     @command(name="infractions", aliases=["show_infractions"])
-    async def infractions(self, ctx: Context, user: Member = None) -> None:
+    async def infractions(self, ctx: Context, user: FetchedMember = None) -> None:
         '''Return user's infractions'''
         if user is None:
             user = ctx.author
@@ -200,40 +201,50 @@ class Information(Cog):
         else:
             await ctx.send(embed=embed)
 
-    async def create_user_embed(self, ctx: Context, user: Member) -> Embed:
+    async def create_user_embed(self, ctx: Context, user: FetchedMember) -> Embed:
         """Creates an embed containing information on the `user`."""
         created = time_since(user.created_at, max_units=3)
 
-        # Custom status
-        custom_status = ''
-        for activity in user.activities:
-            # Check activity.state for None value if user has a custom status set
-            # This guards against a custom status with an emoji but no text, which will cause
-            # escape_markdown to raise an exception
-            # This can be reworked after a move to d.py 1.3.0+, which adds a CustomActivity class
-            if activity.name == 'Custom Status' and activity.state:
-                state = escape_markdown(activity.state)
-                custom_status = f'Status: {state}\n'
-
         name = str(user)
-        if user.nick:
-            name = f"{user.nick} ({name})"
+        custom_status = ''
+        if isinstance(user, Member):
+            if user.nick:
+                name = f"{user.nick} ({name})"
 
-        joined = time_since(user.joined_at, precision="days")
-        roles = ", ".join(role.mention for role in user.roles[1:])
+            mention = user.mention
+
+            joined = time_since(user.joined_at, precision="days")
+            roles = ", ".join(role.mention for role in user.roles[1:])
+
+            for activity in user.activities:
+                # Check activity.state for None value if user has a custom status set
+                # This guards against a custom status with an emoji but no text, which will cause
+                # escape_markdown to raise an exception
+                # This can be reworked after a move to d.py 1.3.0+, which adds a CustomActivity class
+                if activity.name == 'Custom Status' and activity.state:
+                    state = escape_markdown(activity.state)
+                    custom_status = f'Status: {state}\n'
+        else:
+            roles = None
+            mention = f'{user.name}#{user.discriminator}'
 
         description = [
             textwrap.dedent(f"""
                 **User Information**
                 Created: {created}
-                Profile: {user.mention}
+                Profile: {mention}
                 ID: {user.id}
                 {custom_status}
+            """).strip()
+        ]
+        if isinstance(user, Member):
+            description[0] += '\n'
+            description[0] += textwrap.dedent(f"""
                 **Member Information**
                 Joined: {joined}
                 Roles: {roles or None}
             """).strip()
-        ]
+
         if has_higher_role_check(ctx, user):
             # Show more verbose output in staff channels for infractions
             if ctx.channel.id in constants.STAFF_CHANNELS and with_role_check(ctx, *constants.STAFF_ROLES):
@@ -252,16 +263,19 @@ class Information(Cog):
 
         return embed
 
-    async def create_infractions_embed(self, ctx: Context, user: Member) -> Embed:
+    async def create_infractions_embed(self, ctx: Context, user: FetchedMember) -> Embed:
         """Create an embed containing information on user's infractions"""
 
         name = str(user)
-        if user.nick:
-            name = f'{user.nick} ({name})'
+        if isinstance(user, Member):
+            if user.nick:
+                name = f'{user.nick} ({name})'
 
-        roles = user.roles[1:]
+            roles = user.roles[1:]
+        else:
+            roles = []
 
-        description = await self.full_user_infraction_counts(user)
+        description = await self.full_user_infraction_counts(ctx, user)
 
         embed = Embed(
             title=name,
@@ -273,7 +287,7 @@ class Information(Cog):
 
         return embed
 
-    async def basic_user_infraction_counts(self, member: Member) -> str:
+    async def basic_user_infraction_counts(self, member: FetchedMember) -> str:
         """Gets the total and active infraction counts for the given `member`."""
         infs = infractions.get_infractions(member)
         active_infs = infractions.get_active_infractions(member)
@@ -285,7 +299,7 @@ class Information(Cog):
 
         return infraction_output
 
-    async def expanded_user_infraction_counts(self, member: Member) -> str:
+    async def expanded_user_infraction_counts(self, member: FetchedMember) -> str:
         """
         Gets expanded infraction counts for the given `member`.
 
@@ -323,7 +337,7 @@ class Information(Cog):
 
         return "\n".join(infraction_output)
 
-    async def full_user_infraction_counts(self, member: Member) -> str:
+    async def full_user_infraction_counts(self, ctx: Context, member: FetchedMember) -> str:
         """
         Gets full infraction info with descriptions for the given member
 
@@ -333,16 +347,21 @@ class Information(Cog):
         def get_infractions_by_type(guild: Guild, all_infractions: list) -> dict:
             infraction_types = set()
             infractions_dict = defaultdict(list)
+
+            # Loop through all given infractions
             for infraction in all_infractions:
+                # Add infraction type to infraction_types set
                 infraction_type = infraction.type
                 infraction_types.add(infraction_type)
-
+                # Append the infraction to infractions_dict with type as key
                 infractions_dict[infraction_type].append(infraction)
 
             line = '```yaml\n'
             for infraction_type in sorted(infraction_types):
+                # Get total infraction amount
                 infractions_amt = len(infractions_dict[infraction_type])
                 line += f'{infraction_type}s: {infractions_amt}\n'
+                # Print details about infractions with current type
                 for infraction in infractions_dict[infraction_type]:
                     # Get actors name if possible
                     actor = guild.get_member(infraction.actor_id)
@@ -363,7 +382,7 @@ class Information(Cog):
 
         active_infs = infractions.get_active_infractions(member)
         inactive_infs = infractions.get_inactive_infractions(member)
-        guild = member.guild
+        guild = ctx.guild
 
         if not active_infs and not inactive_infs:
             infraction_output = ["**Infractions**"]
