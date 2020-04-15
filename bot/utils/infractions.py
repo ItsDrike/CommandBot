@@ -1,11 +1,12 @@
 import datetime
 import logging
-from discord import Guild, User
+from discord import Guild, User, Client
 from bot.database import SQLite
 from bot.constants import Time
 from bot.utils import time
 from dateutil.relativedelta import relativedelta
 from bot.utils.converters import FetchedMember
+from bot.bot import Bot
 
 log = logging.getLogger(__name__)
 
@@ -96,15 +97,12 @@ class Infraction:
         db.execute(sql_command)
         db.close()
 
-    async def pardon(self, guild: Guild, user: User, force: bool = False) -> None:
+    async def pardon(self, guild: Guild, bot: Bot, force: bool = False) -> None:
         # Ignore already pardoned infractions
         if not self.is_active:
             return
 
-        if self.user_id != user.id:
-            log.warning(
-                f'Invalid pardon, given user is not the infraction user')
-            return
+        user = bot.fetch_user(self.user_id)
 
         if not force:
             if self.type == 'ban':
@@ -112,6 +110,19 @@ class Infraction:
                 print(f'Found {user} to unban')
                 await guild.unban(user)
         self.make_inactive()
+
+
+def get_infraction_by_row(row_id: int) -> Infraction:
+    db = SQLite()
+    db.execute(f'SELECT * FROM infractions WHERE rowid={row_id}')
+    try:
+        infraction = Infraction(*db.cur.fetchone())
+        log.debug(f'Getting infraction #{row_id}')
+    except TypeError:
+        infraction = False
+    db.close()
+
+    return infraction
 
 
 def get_all_active_infractions(inf_type: str = None) -> list:
@@ -203,3 +214,18 @@ async def check_infractions_expiry(guild: Guild, inf_type: str = None) -> None:
         if not infraction.active:
             # Infraction expired, de-activate it
             await infraction.pardon(guild)
+
+
+async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
+    db = SQLite()
+    db.execute(f'SELECT * FROM infractions WHERE rowid={row_id}')
+    try:
+        infraction = Infraction(*db.cur.fetchone())
+        await infraction.pardon(guild, bot)
+        db.execute(f'DELETE FROM infractions WHERE rowid={row_id}')
+        log.debug(f'Removed infraction #{row_id}')
+    except TypeError:
+        infraction = False
+    db.close()
+
+    return infraction

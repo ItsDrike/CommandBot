@@ -1,8 +1,9 @@
 import logging
 import random
+import textwrap
 from datetime import datetime
 
-from discord import Embed, Member
+from discord import Colour, Embed, Member
 from discord.errors import Forbidden
 from discord.ext import commands
 from discord.ext.commands import Context, command
@@ -59,7 +60,7 @@ class Infractions(commands.Cog):
             return True
 
     @with_role(*constants.STAFF_ROLES)
-    @command(name='warn', aliases=['infraction'])
+    @command()
     async def warn(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
         """Warn a user for a given reason"""
         if await self.check_bot(ctx, user, 'warn'):
@@ -125,7 +126,7 @@ class Infractions(commands.Cog):
 
             force = False
             for infraction in infs:
-                await infraction.pardon(ctx.guild, user, force=force)
+                await infraction.pardon(ctx.guild, self.bot, force=force)
                 # Make force pardon in case there are more infractions (discord logs only 1 ban)
                 force = True
 
@@ -139,3 +140,42 @@ class Infractions(commands.Cog):
                 colour=constants.Colours.soft_red
             )
             await ctx.send(embed=embed)
+
+    @with_role(constants.Roles.owners)
+    @command()
+    async def pardon(self, ctx: Context, infraction_id: int) -> None:
+        inf = await infractions.remove_infraction(ctx.guild, self.bot, infraction_id)
+
+        if inf:
+            user = ctx.guild.get_member(inf.user_id)
+            if not user:
+                user = inf.user_id
+
+            actor = ctx.guild.get_member(inf.actor_id)
+            if not actor:
+                actor = inf.actor_id
+
+            description = textwrap.dedent(f"""
+            **Infraction Removed**
+            ID: {infraction_id}
+            Given to: {user}
+            Type: {inf.type}
+            Reason: {inf.reason}
+            Actor: {actor}
+            Duration: {inf.str_duration}
+            Given: {inf.str_start}
+            """).strip()
+
+            embed = Embed(
+                title=random.choice(constants.POSITIVE_REPLIES),
+                description=description,
+                colour=Colour.blurple()
+            )
+        else:
+            embed = Embed(
+                title=random.choice(constants.NEGATIVE_REPLIES),
+                description=f'Infraction not found',
+                colour=constants.Colours.soft_red
+            )
+
+        await ctx.send(embed=embed)

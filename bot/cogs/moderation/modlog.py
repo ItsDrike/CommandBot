@@ -345,7 +345,7 @@ class ModLog(Cog, name="ModLog"):
         infs = infractions.get_active_infractions(
             member, inf_type='ban')
         for infraction in infs:
-            await infraction.pardon(guild, member, force=True)
+            await infraction.pardon(guild, self.bot, force=True)
 
         member_str = escape_markdown(str(member))
         await self.send_log_message(
