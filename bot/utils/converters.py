@@ -16,7 +16,7 @@ def proxy_user(user_id: str) -> discord.Object:
 
     Used when a Member or User object cannot be resolved.
     """
-    log.trace(f"Attempting to create a proxy user for the user id {user_id}.")
+    log.debug(f"Attempting to create a proxy user for the user id {user_id}.")
 
     try:
         user_id = int(user_id)
@@ -103,7 +103,7 @@ class FetchedUser(UserConverter):
 
         try:
             user_id = int(arg)
-            log.trace(f"Fetching user {user_id}...")
+            log.debug(f"Fetching user {user_id}...")
             return await ctx.bot.fetch_user(user_id)
         except ValueError:
             log.debug(f"Failed to fetch user {arg}: could not convert to int.")
