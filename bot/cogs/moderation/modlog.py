@@ -283,6 +283,13 @@ class ModLog(Cog, name="ModLog"):
             self._ignored[Event.member_ban].remove(member.id)
             return
 
+        infs = infractions.get_active_infractions(
+            member, inf_type='ban')
+        # Check if there are no infractions for this ban, if there aren't log it
+        if len(infs) == 0:
+            infractions.Infraction(
+                member.id, 'ban', 'Unknown/Server banned', 100000000000000000, datetime.now(), 1_000_000_000, write_to_db=True)
+
         await self.send_log_message(
             Icons.user_ban, Colours.soft_red,
             "User banned", f"{member} (`{member.id}`)",
