@@ -7,6 +7,7 @@ from bot.utils import time
 from dateutil.relativedelta import relativedelta
 from bot.utils.converters import FetchedMember
 from bot.bot import Bot
+from discord.errors import NotFound
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class Infraction:
 
         self.duration = duration
         self.stop = self.start + datetime.timedelta(0, self.duration)
-        if not active:
+        if active is None:
             self.is_active = self.active
         else:
             self.is_active = bool(active)
@@ -79,7 +80,7 @@ class Infraction:
 
         sql_command = f'''INSERT INTO infractions VALUES(
                         {self.user_id}, "{self.type}", "{self.reason}", "{self.actor_id}",
-                        "{self.str_start}", {self.duration}, {self.is_active}
+                        "{self.str_start}", {self.duration}, {int(self.is_active)}
                         );
                         '''
         db = SQLite()
@@ -89,7 +90,7 @@ class Infraction:
     def make_inactive(self) -> None:
         '''Set infraction Active state to 0 in database'''
         log.debug(
-            f'Deactivating infraction {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]')
+            f'Deactivating infraction #{self.id}: {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]')
 
         sql_command = f'''UPDATE infractions SET Active=0 WHERE rowid={self.id};'''
 
@@ -106,15 +107,19 @@ class Infraction:
 
         if not force:
             if self.type == 'ban':
-                log.info(f'User {user} ({self.user_id}) has been unbanned')
-                print(f'Found {user} to unban')
-                await guild.unban(user)
+                try:
+                    await guild.unban(user)
+                    log.info(f'User {user} ({self.user_id}) has been unbanned')
+                except NotFound:
+                    log.info(
+                        f"User {user} ({self.user_id}) isn't banned, but found an active ban infraction")
+
         self.make_inactive()
 
 
 def get_infraction_by_row(row_id: int) -> Infraction:
     db = SQLite()
-    db.execute(f'SELECT * FROM infractions WHERE rowid={row_id}')
+    db.execute(f'SELECT *, rowid FROM infractions WHERE rowid={row_id}')
     try:
         infraction = Infraction(*db.cur.fetchone())
         log.debug(f'Getting infraction #{row_id}')
@@ -218,7 +223,7 @@ async def check_infractions_expiry(guild: Guild, inf_type: str = None) -> None:
 
 async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
     db = SQLite()
-    db.execute(f'SELECT * FROM infractions WHERE rowid={row_id}')
+    db.execute(f'SELECT *, rowid FROM infractions WHERE rowid={row_id}')
     try:
         infraction = Infraction(*db.cur.fetchone())
         await infraction.pardon(guild, bot)
