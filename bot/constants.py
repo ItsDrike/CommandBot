@@ -288,6 +288,10 @@ class Icons(metaclass=YAMLGetter):
     defcon_enables: str
     defcon_updated: str
 
+    voice_state_blue: str
+    voice_state_green: str
+    voice_state_red: str
+
 
 class Event(Enum):
     """
@@ -307,6 +311,7 @@ class Event(Enum):
     member_remove = "member_remove"
     member_ban = "member_ban"
     member_unban = "member_unban"
+    member_kick = "member_kick"
     member_update = "member_update"
 
     message_delete = "message_delete"

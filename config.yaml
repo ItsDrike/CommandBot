@@ -246,3 +246,7 @@ style:
         defcon_disabled: "https://cdn.discordapp.com/emojis/470326273952972810.png"
         defcon_enabled:  "https://cdn.discordapp.com/emojis/470326274213150730.png"
         defcon_updated:  "https://cdn.discordapp.com/emojis/472472638342561793.png"
+
+        voice_state_blue: "https://cdn.discordapp.com/emojis/656899769662439456.png"
+        voice_state_green: "https://cdn.discordapp.com/emojis/656899770094452754.png"
+        voice_state_red: "https://cdn.discordapp.com/emojis/656899769905709076.png"
