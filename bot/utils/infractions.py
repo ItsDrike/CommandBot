@@ -1,6 +1,6 @@
 import datetime
 import logging
-from discord import Guild, User, Client
+from discord import Guild
 from bot.database import SQLite
 from bot.constants import Time
 from bot.utils import time
