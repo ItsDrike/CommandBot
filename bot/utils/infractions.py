@@ -102,11 +102,11 @@ class Infraction:
         if not self.is_active:
             return
 
-        user = bot.fetch_user(self.user_id)
+        user = await bot.fetch_user(self.user_id)
 
         if not force:
             if self.type == 'ban':
-                log.info(f'User {user} ({user.id}) has been unbanned')
+                log.info(f'User {user} ({self.user_id}) has been unbanned')
                 print(f'Found {user} to unban')
                 await guild.unban(user)
         self.make_inactive()
