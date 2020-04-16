@@ -235,6 +235,7 @@ class Information(Cog):
             Actor: {actor}
             Duration: {infraction.str_duration}
             Given: {infraction.str_start}
+            Active: {infraction.is_active}
             """).strip()
 
             embed = Embed(

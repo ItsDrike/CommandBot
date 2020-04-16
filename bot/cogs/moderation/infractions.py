@@ -176,6 +176,7 @@ class Infractions(commands.Cog):
             Actor: {actor}
             Duration: {inf.str_duration}
             Given: {inf.str_start}
+            Active: {inf.is_active}
             """).strip()
 
             embed = Embed(
