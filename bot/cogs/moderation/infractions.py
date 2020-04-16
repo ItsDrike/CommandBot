@@ -104,15 +104,25 @@ class Infractions(commands.Cog):
         if not await self.check_role(ctx, user, 'ban'):
             return
 
+        infs = infractions.get_active_infractions(
+            user, inf_type='ban')
+
+        if len(infs) != 0:
+            embed = Embed(
+                title=random.choice(constants.NEGATIVE_REPLIES),
+                description='This user is already banned',
+                color=constants.Colours.soft_red
+            )
+            await ctx.send(embed=embed)
+            return
+
         self.mod_log.ignore(Event.member_remove, user.id)
 
         try:
-            await ctx.guild.ban(user, reason=reason)
-
-            # Give ban infraction with 100 years time (can't use infinity)
+            # Give ban infraction with 1000000000 seconds time (can't use infinity)
             infractions.Infraction(
                 user.id, 'ban', reason, ctx.author.id, datetime.now(), 1_000_000_000, write_to_db=True)
-
+            await ctx.guild.ban(user, reason=reason)
             await ctx.send(f':exclamation:User {user.mention} has been permanently banned ({reason})')
         except Forbidden:
             raise BotMissingPermissions('ban')
@@ -120,6 +130,7 @@ class Infractions(commands.Cog):
     @with_role(*constants.MODERATION_ROLES)
     @command()
     async def unban(self, ctx: Context, user: FetchedMember) -> None:
+        """Prematurely end the active ban infraction for the user."""
         infs = infractions.get_active_infractions(user, inf_type='ban')
         if len(infs) >= 1:
             log.info(f'User {user} was unbanned by {ctx.author}')
@@ -144,6 +155,7 @@ class Infractions(commands.Cog):
     @with_role(constants.Roles.owners)
     @command()
     async def pardon(self, ctx: Context, infraction_id: int) -> None:
+        """Pardon any infraction by its ID"""
         inf = await infractions.remove_infraction(ctx.guild, self.bot, infraction_id)
 
         if inf:
