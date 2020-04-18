@@ -2,7 +2,7 @@ import datetime
 import logging
 from discord import Guild
 from bot.database import SQLite
-from bot.constants import Time
+from bot import constants
 from bot.utils import time
 from dateutil.relativedelta import relativedelta
 from bot.utils.converters import FetchedMember
@@ -35,7 +35,7 @@ class Infraction:
         # For easier convertion from database
         elif type(start) == str:
             self.start = datetime.datetime.strptime(
-                start, Time.time_format)
+                start, constants.Time.time_format)
 
         self.duration = duration
         self.stop = self.start + datetime.timedelta(0, self.duration)
@@ -57,7 +57,7 @@ class Infraction:
 
     @property
     def str_start(self) -> str:
-        return datetime.datetime.strftime(self.start, Time.time_format)
+        return datetime.datetime.strftime(self.start, constants.Time.time_format)
 
     @property
     def str_duration(self) -> str:
@@ -211,14 +211,15 @@ async def pardon_last_infraction(guild: Guild, user: FetchedMember, inf_type: st
     await infractions[-1].pardon(guild, force=force)
 
 
-async def check_infractions_expiry(guild: Guild, inf_type: str = None) -> None:
+async def check_infractions_expiry(bot: Bot, inf_type: str = None) -> None:
+    guild = bot.get_guild(constants.Guild.id)
     active_infractions = get_all_active_infractions(inf_type=inf_type)
 
     for infraction in active_infractions:
         # Check if infraction is no longer active by duration
         if not infraction.active:
             # Infraction expired, de-activate it
-            await infraction.pardon(guild)
+            await infraction.pardon(guild, bot)
 
 
 async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
@@ -228,7 +229,7 @@ async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
         infraction = Infraction(*db.cur.fetchone())
         await infraction.pardon(guild, bot)
         db.execute(f'DELETE FROM infractions WHERE rowid={row_id}')
-        log.debug(f'Removed infraction #{row_id}')
+        log.info(f'Removed infraction #{row_id}')
     except TypeError:
         infraction = False
     db.close()
