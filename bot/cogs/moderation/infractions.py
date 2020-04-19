@@ -127,6 +127,9 @@ class Infractions(commands.Cog):
         except Forbidden:
             raise BotMissingPermissions('ban')
 
+    # TODO: Add tempban
+    # TODO: Add mute & unmute
+
     @with_role(*constants.MODERATION_ROLES)
     @command()
     async def unban(self, ctx: Context, user: FetchedMember) -> None:
