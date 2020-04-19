@@ -31,6 +31,7 @@ client.load_extension('bot.cogs.moderation')
 
 client.load_extension('bot.cogs.information')
 client.load_extension('bot.cogs.clean')
+client.load_extension('bot.cogs.announcements')
 
 if constants.Bot.token:
     client.run(constants.Bot.token)
