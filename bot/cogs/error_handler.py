@@ -108,11 +108,11 @@ class ErrorHandler(Cog):
         elif isinstance(e, errors.TooManyArguments):
             await ctx.send(f"Too many arguments provided.")
             await ctx.invoke(*help_command)
-        elif isinstance(e, errors.BadArgument):
+        elif isinstance(e, (errors.BadArgument, errors.BadUnionArgument)):
             await ctx.send(f"Bad argument: {e}\n")
             await ctx.invoke(*help_command)
-        elif isinstance(e, errors.BadUnionArgument):
-            await ctx.send(f"Bad argument: {e}\n```{e.errors[-1]}```")
+        # elif isinstance(e, errors.BadUnionArgument):
+        #     await ctx.send(f"Bad argument: {e}\n```{e.errors[-1]}```")
         elif isinstance(e, errors.ArgumentParsingError):
             await ctx.send(f"Argument parsing error: {e}")
         else:
