@@ -13,6 +13,7 @@ from discord.ext.commands import Cog, Context
 from discord.utils import escape_markdown
 
 from bot.constants import Channels, Colours, Emojis, Event, Guild as GuildConstant, Icons
+from bot.constants import Roles
 from bot.utils.time import humanize_delta
 from bot.utils import infractions
 
@@ -313,6 +314,11 @@ class ModLog(Cog, name="ModLog"):
         if difference.days < 1 and difference.months < 1 and difference.years < 1:  # New user account!
             message = f"{Emojis.new} {message}"
 
+        guest_role = member.guild.get_role(Roles.guests)
+        await member.add_roles(guest_role)
+
+        log.info(f'User {member} has joined')
+
         await self.send_log_message(
             Icons.sign_in, Colours.soft_green,
             "User joined", message,
@@ -329,6 +335,8 @@ class ModLog(Cog, name="ModLog"):
         if member.id in self._ignored[Event.member_remove]:
             self._ignored[Event.member_remove].remove(member.id)
             return
+
+        log.info(f'User {member} has left')
 
         member_str = escape_markdown(str(member))
         await self.send_log_message(
