@@ -12,7 +12,7 @@ from discord.ext.commands.errors import BotMissingPermissions
 
 from bot import constants
 from bot.bot import Bot
-from bot.constants import Event
+from bot.constants import Event, Colours
 from bot.decorators import with_role
 from bot.utils import infractions
 from bot.utils.checks import has_higher_role_check
@@ -101,68 +101,14 @@ class Infractions(commands.Cog):
     async def ban(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
         """Permanently ban a user for the given reason"""
 
-        if await self.check_bot(ctx, user, 'ban'):
-            return
-        if not await self.check_role(ctx, user, 'ban'):
-            return
-
-        infs = infractions.get_active_infractions(
-            user, inf_type='ban')
-
-        for infraction in infs:
-            if infraction.duration == 1_000_000_000:
-                embed = Embed(
-                    title=random.choice(constants.NEGATIVE_REPLIES),
-                    description='This user is already banned',
-                    color=constants.Colours.soft_red
-                )
-                await ctx.send(embed=embed)
-                return
-
-        self.mod_log.ignore(Event.member_remove, user.id)
-
-        try:
-            # Give ban infraction with 1000000000 seconds time (can't use infinity)
-            infractions.Infraction(
-                user.id, 'ban', reason, ctx.author.id, datetime.now(), 1_000_000_000, write_to_db=True)
-            await ctx.guild.ban(user, reason=reason)
-            await ctx.send(f':exclamation:User {user.mention} has been permanently banned ({reason})')
-        except Forbidden:
-            raise BotMissingPermissions('ban')
+        # Pass 1_000_000_000 as duration (can't pass infinity)
+        await self.apply_ban(ctx, user, 1_000_000_000, reason)
 
     @command()
     async def tempban(self, ctx: Context, user: FetchedMember, duration: Expiry, *, reason: str = None) -> None:
         """Temporarily ban a user for the given time and reason"""
 
-        if await self.check_bot(ctx, user, 'ban'):
-            return
-        if not await self.check_role(ctx, user, 'ban'):
-            return
-
-        infs = infractions.get_active_infractions(
-            user, inf_type='ban')
-
-        for infraction in infs:
-            if infraction.stop > (datetime.now() + relativedelta(seconds=duration)):
-                embed = Embed(
-                    title=random.choice(constants.NEGATIVE_REPLIES),
-                    description=f"This user is already banned\n(Currents ban ends at: {infraction.stop})",
-                    color=constants.Colours.soft_red
-                )
-                await ctx.send(embed=embed)
-                return
-
-        self.mod_log.ignore(Event.member_remove, user.id)
-
-        try:
-            # Give ban infraction with 1000000000 seconds time (can't use infinity)
-            infractions.Infraction(
-                user.id, 'ban', reason, ctx.author.id, datetime.now(), duration, write_to_db=True)
-            await ctx.guild.ban(user, reason=reason)
-            duration_str = humanize_delta(relativedelta(seconds=duration))
-            await ctx.send(f':exclamation:User {user.mention} has been banned for {duration_str} ({reason})')
-        except Forbidden:
-            raise BotMissingPermissions('ban')
+        await self.apply_ban(ctx, user, duration, reason)
 
     # TODO: Add mute & unmute
 
@@ -231,3 +177,72 @@ class Infractions(commands.Cog):
             )
 
         await ctx.send(embed=embed)
+
+    async def apply_ban(self, ctx: Context, user: FetchedMember, duration: int, reason: str = None) -> None:
+        # Check if user isn't bot
+        if await self.check_bot(ctx, user, 'ban'):
+            return
+        # Check if author has permission to ban this user
+        if not await self.check_role(ctx, user, 'ban'):
+            return
+
+        # Get current user's active bans
+        infs = infractions.get_active_infractions(
+            user, inf_type='ban')
+
+        # Determine if the user has any active ban infractions that override the current one
+        for infraction in infs:
+            if infraction.stop > (datetime.now() + relativedelta(seconds=duration)):
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description=f"This user is already banned\n(Currents ban ends at: {infraction.stop})",
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
+            if infraction.duration == 1_000_000_000:
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description=f"This user is already banned permanently",
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
+
+        # Do not send member_remove message to mod_log
+        self.mod_log.ignore(Event.member_remove, user.id)
+
+        try:
+            # Add an infraction to user
+            infractions.Infraction(
+                user.id, 'ban', reason, ctx.author.id, datetime.now(), duration, write_to_db=True)
+
+            duration_str = humanize_delta(relativedelta(seconds=duration))
+            # Try to send DM with ban details to user
+            try:
+                embed = Embed(
+                    title="**You were banned**",
+                    description=textwrap.dedent(f"""
+                        **Ban length:** {duration_str}
+                        **Reason:** {reason}
+                        If you think that this ban was unreasonable, deal with it, we have no appeal process quite yet
+                        """).strip(),
+                    colour=Colours.soft_red
+                )
+                await user.send(embed=embed)
+            except Forbidden:
+                log.debug("Ban DM wasn't sent, insufficient permissions")
+
+            # Ban the user and send message
+            await ctx.guild.ban(user, reason=reason)
+            if duration != 1_000_000_000:
+                message = f":exclamation:User {user.mention} has been banned for {duration_str} ({reason})"
+                log_msg = f"User {user} has been banned by {ctx.author}, duration: {duration_str}, reason: {reason}"
+            else:
+                message = f":exclamation:User {user.mention} has been **permanently** banned ({reason})"
+                log_msg = f"User {user} has been permanently banned by {ctx.author}, reason: {reason}"
+            await ctx.send(message)
+
+            log.info(log_msg)
+        except Forbidden:
+            raise BotMissingPermissions('ban')
