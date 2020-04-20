@@ -80,21 +80,7 @@ class Infractions(commands.Cog):
     async def kick(self, ctx: Context, user: Member, *, reason: str = None) -> None:
         """Kick a user for a given reason"""
 
-        if await self.check_bot(ctx, user, 'kick'):
-            return
-        if not await self.check_role(ctx, user, 'kick'):
-            return
-
-        infractions.Infraction(
-            user.id, 'kick', reason, ctx.author.id, datetime.now(), 0, write_to_db=True)
-
-        self.mod_log.ignore(Event.member_remove, user.id)
-
-        try:
-            await ctx.guild.kick(user, reason=reason)
-            await ctx.send(f':exclamation:User {user.mention} has been kicked ({reason})')
-        except Forbidden:
-            raise BotMissingPermissions('kick')
+        await self.apply_kick(ctx, user, reason)
 
     @with_role(*constants.MODERATION_ROLES)
     @command()
@@ -247,3 +233,38 @@ class Infractions(commands.Cog):
             log.info(log_msg)
         except Forbidden:
             raise BotMissingPermissions('ban')
+
+    async def apply_kick(self, ctx: Context, user: Member, reason: str = None) -> None:
+        # Check if user isn't bot
+        if await self.check_bot(ctx, user, 'ban'):
+            return
+        # Check if author has permission to ban this user
+        if not await self.check_role(ctx, user, 'ban'):
+            return
+
+        # Add an infraction to user
+        infractions.Infraction(
+            user.id, 'kick', reason, ctx.author.id, datetime.now(), 0, write_to_db=True)
+
+        # Do not send member_remove message to mod_log
+        self.mod_log.ignore(Event.member_remove, user.id)
+
+        try:
+            # Try to send DM with kick details to user
+            try:
+                embed = Embed(
+                    title="**You were kicked**",
+                    description=textwrap.dedent(f"""
+                        **Reason:** {reason}
+                        """).strip(),
+                    colour=Colours.soft_red
+                )
+                await user.send(embed=embed)
+            except Forbidden:
+                log.debug("Kick DM wasn't sent, insufficient permissions")
+            await ctx.guild.kick(user, reason=reason)
+            await ctx.send(f':exclamation:User {user.mention} has been kicked ({reason})')
+            log.info(
+                f'User {user} has been kicked by {ctx.author}, reason: {reason}')
+        except Forbidden:
+            raise BotMissingPermissions('kick')
