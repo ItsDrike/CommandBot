@@ -19,7 +19,7 @@ class Announcements(commands.Cog):
 
     @in_channel(Channels.commands, bypass_roles=STAFF_ROLES)
     @command()
-    async def subscribe(self, ctx: Context):
+    async def subscribe(self, ctx: Context) -> None:
         """Get notified on new announcements"""
         if without_role_check(ctx, Roles.announcements):
             author = ctx.author
@@ -33,7 +33,7 @@ class Announcements(commands.Cog):
 
     @in_channel(Channels.commands, bypass_roles=STAFF_ROLES)
     @command()
-    async def unsubscribe(self, ctx: Context):
+    async def unsubscribe(self, ctx: Context) -> None:
         """Stop receiving new announcements"""
         if with_role_check(ctx, Roles.announcements):
             author = ctx.author

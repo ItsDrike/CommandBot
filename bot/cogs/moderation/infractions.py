@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 
 class Infractions(commands.Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot) -> None:
         self.bot = bot
 
     @property
