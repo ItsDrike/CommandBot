@@ -1,13 +1,16 @@
 import datetime
 import logging
-from discord import Guild
-from bot.database import SQLite
-from bot import constants
-from bot.utils import time
+from collections import defaultdict
+
 from dateutil.relativedelta import relativedelta
-from bot.utils.converters import FetchedMember
-from bot.bot import Bot
+from discord import Guild
 from discord.errors import NotFound
+
+from bot import constants
+from bot.bot import Bot
+from bot.database import SQLite
+from bot.utils import time
+from bot.utils.converters import FetchedMember
 
 log = logging.getLogger(__name__)
 
@@ -214,12 +217,23 @@ async def pardon_last_infraction(guild: Guild, user: FetchedMember, inf_type: st
 async def check_infractions_expiry(bot: Bot, inf_type: str = None) -> None:
     guild = bot.get_guild(constants.Guild.id)
     active_infractions = get_all_active_infractions(inf_type=inf_type)
+    type_infractions = defaultdict(list)
+    for infraction in active_infractions:
+        type_infractions[infraction.type].append(infraction)
 
     for infraction in active_infractions:
         # Check if infraction is no longer active by duration
         if not infraction.active:
-            # Infraction expired, de-activate it
-            await infraction.pardon(guild, bot)
+            for inf in type_infractions[infraction.type]:
+                # There is other infraction of the same type with is still active by duration
+                if inf.active:
+                    # Deactivate infraction without pardoning the action it represents
+                    await infraction.pardon(guild, bot, force=True)
+                    break
+            # If there is no other active infraction of the same type
+            else:
+                # Infraction expired, de-activate it
+                await infraction.pardon(guild, bot)
 
 
 async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
