@@ -104,6 +104,7 @@ class Infractions(commands.Cog):
         # Pass 1_000_000_000 as duration (can't pass infinity)
         await self.apply_ban(ctx, user, 1_000_000_000, reason)
 
+    @with_role(*constants.MODERATION_ROLES)
     @command()
     async def tempban(self, ctx: Context, user: FetchedMember, duration: Expiry, *, reason: str = None) -> None:
         """Temporarily ban a user for the given time and reason"""
