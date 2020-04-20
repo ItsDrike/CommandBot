@@ -3,6 +3,8 @@ import logging
 import re
 import typing as t
 
+import dateutil.parser
+import dateutil.tz
 import discord
 from dateutil.relativedelta import relativedelta
 from discord.ext.commands import BadArgument, Context, Converter, UserConverter
@@ -40,16 +42,16 @@ class Duration(Converter):
 
     duration_parser = re.compile(
         r"((?P<years>\d+?) ?(years|year|Y|y) ?)?"
-        r"((?P<months>\d+?) ?(months|month|m) ?)?"
+        r"((?P<months>\d+?) ?(months|month|mo) ?)?"
         r"((?P<weeks>\d+?) ?(weeks|week|W|w) ?)?"
         r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
-        r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
-        r"((?P<minutes>\d+?) ?(minutes|minute|M) ?)?"
+        r"((?P<hours>\d+?) ?(hours|hour|hrs|H|h) ?)?"
+        r"((?P<minutes>\d+?) ?(minutes|minute|min|m) ?)?"
         r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
     )
 
     @classmethod
-    def convert(self, duration: str) -> datetime:
+    async def convert(self, ctx: Context, duration: str) -> int:
         """
         Converts a `duration` string to a datetime object that's `duration` in the future.
 
@@ -76,6 +78,48 @@ class Duration(Converter):
         end_time = now + delta
         seconds = (end_time - now).total_seconds()
 
+        return seconds
+
+
+class ISODateTime(Converter):
+    """Converts an ISO-8601 datetime string into a datetime.datetime."""
+
+    async def convert(self, ctx: Context, datetime_string: str) -> int:
+        """
+        Converts a ISO-8601 `datetime_string` into a `datetime.datetime` object.
+
+        The converter is flexible in the formats it accepts, as it uses the `isoparse` method of
+        `dateutil.parser`. In general, it accepts datetime strings that start with a date,
+        optionally followed by a time. Specifying a timezone offset in the datetime string is
+        supported, but the `datetime` object will be converted to UTC and will be returned without
+        `tzinfo` as a timezone-unaware `datetime` object.
+
+        See: https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.isoparse
+
+        Formats that are guaranteed to be valid by our tests are:
+
+        - `YYYY-mm-ddTHH:MM:SSZ` | `YYYY-mm-dd HH:MM:SSZ`
+        - `YYYY-mm-ddTHH:MM:SS±HH:MM` | `YYYY-mm-dd HH:MM:SS±HH:MM`
+        - `YYYY-mm-ddTHH:MM:SS±HHMM` | `YYYY-mm-dd HH:MM:SS±HHMM`
+        - `YYYY-mm-ddTHH:MM:SS±HH` | `YYYY-mm-dd HH:MM:SS±HH`
+        - `YYYY-mm-ddTHH:MM:SS` | `YYYY-mm-dd HH:MM:SS`
+        - `YYYY-mm-ddTHH:MM` | `YYYY-mm-dd HH:MM`
+        - `YYYY-mm-dd`
+        - `YYYY-mm`
+        - `YYYY`
+
+        Note: ISO-8601 specifies a `T` as the separator between the date and the time part of the
+        datetime string. The converter accepts both a `T` and a single space character.
+        """
+        try:
+            dt = dateutil.parser.isoparse(datetime_string)
+        except ValueError:
+            raise BadArgument(
+                f"`{datetime_string}` is not a valid ISO-8601 datetime string")
+
+        now = datetime.datetime.now()
+
+        seconds = (dt - now).total_seconds()
         return seconds
 
 
@@ -121,3 +165,4 @@ class FetchedUser(UserConverter):
 
 
 FetchedMember = t.Union[discord.Member, FetchedUser]
+Expiry = t.Union[Duration, ISODateTime]
