@@ -3,6 +3,7 @@ import random
 import textwrap
 from datetime import datetime
 
+from dateutil.relativedelta import relativedelta
 from discord import Colour, Embed, Member
 from discord.errors import Forbidden
 from discord.ext import commands
@@ -15,7 +16,8 @@ from bot.constants import Event
 from bot.decorators import with_role
 from bot.utils import infractions
 from bot.utils.checks import has_higher_role_check
-from bot.utils.converters import FetchedMember
+from bot.utils.converters import Expiry, FetchedMember
+from bot.utils.time import humanize_delta
 
 from .modlog import ModLog
 
@@ -107,14 +109,15 @@ class Infractions(commands.Cog):
         infs = infractions.get_active_infractions(
             user, inf_type='ban')
 
-        if len(infs) != 0:
-            embed = Embed(
-                title=random.choice(constants.NEGATIVE_REPLIES),
-                description='This user is already banned',
-                color=constants.Colours.soft_red
-            )
-            await ctx.send(embed=embed)
-            return
+        for infraction in infs:
+            if infraction.duration == 1_000_000_000:
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description='This user is already banned',
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
 
         self.mod_log.ignore(Event.member_remove, user.id)
 
@@ -127,7 +130,40 @@ class Infractions(commands.Cog):
         except Forbidden:
             raise BotMissingPermissions('ban')
 
-    # TODO: Add tempban
+    @command()
+    async def tempban(self, ctx: Context, user: FetchedMember, duration: Expiry, *, reason: str = None) -> None:
+        """Temporarily ban a user for the given time and reason"""
+
+        if await self.check_bot(ctx, user, 'ban'):
+            return
+        if not await self.check_role(ctx, user, 'ban'):
+            return
+
+        infs = infractions.get_active_infractions(
+            user, inf_type='ban')
+
+        for infraction in infs:
+            if infraction.stop > (datetime.now() + relativedelta(seconds=duration)):
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description=f"This user is already banned\n(Currents ban ends at: {infraction.stop})",
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
+
+        self.mod_log.ignore(Event.member_remove, user.id)
+
+        try:
+            # Give ban infraction with 1000000000 seconds time (can't use infinity)
+            infractions.Infraction(
+                user.id, 'ban', reason, ctx.author.id, datetime.now(), duration, write_to_db=True)
+            await ctx.guild.ban(user, reason=reason)
+            duration_str = humanize_delta(relativedelta(seconds=duration))
+            await ctx.send(f':exclamation:User {user.mention} has been banned for {duration_str} ({reason})')
+        except Forbidden:
+            raise BotMissingPermissions('ban')
+
     # TODO: Add mute & unmute
 
     @with_role(*constants.MODERATION_ROLES)
