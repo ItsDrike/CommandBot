@@ -49,7 +49,7 @@ def humanize_delta(delta: relativedelta, precision: str = "seconds", max_units: 
     unit_count = 0
     for unit, value in units:
         if value:
-            time_strings.append(_stringify_time_unit(value, unit))
+            time_strings.append(_stringify_time_unit(round(value), unit))
             unit_count += 1
 
         if unit == precision or unit_count >= max_units:
