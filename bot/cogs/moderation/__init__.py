@@ -11,7 +11,7 @@ def setup(bot) -> None:
     infraction_check.start(bot)
 
 
-@loop(seconds=90)
+@loop(seconds=20)
 async def infraction_check(bot):
     if bot.is_ready():
         await infractions.check_infractions_expiry(bot)
