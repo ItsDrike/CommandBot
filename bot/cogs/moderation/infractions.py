@@ -61,6 +61,8 @@ class Infractions(commands.Cog):
         else:
             return True
 
+    # Invoke infractions
+
     @with_role(*constants.STAFF_ROLES)
     @command()
     async def warn(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
@@ -98,6 +100,30 @@ class Infractions(commands.Cog):
         await self.apply_ban(ctx, user, duration, reason)
 
     # TODO: Add mute & unmute
+
+    # Shadow infractions
+    @with_role(*constants.MODERATION_ROLES)
+    @command(hidden=True, aliases=['shadowkick', 'skick'])
+    async def shadow_kick(self, ctx: Context, user: Member, *, reason: str = None) -> None:
+        """Kick a user for the given reason without notifying the user."""
+
+        await self.apply_kick(ctx, user, reason, send_dm=False)
+
+    @with_role(*constants.MODERATION_ROLES)
+    @command(hidden=True, aliases=['shadowban', 'sban'])
+    async def shadow_ban(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
+        """Permanently ban a user for the given reason without notifying the user."""
+
+        await self.apply_ban(ctx, user, 1_000_000_000, reason, send_dm=False)
+
+    @with_role(*constants.MODERATION_ROLES)
+    @command(hidden=True, aliases=['shadowtempban', 'stempban'])
+    async def shadow_tempban(self, ctx: Context, user: FetchedMember, duration: Expiry, *, reason: str = None) -> None:
+        """Temporarily ban a user for the given reason and duration without notifying the user."""
+
+        await self.apply_ban(ctx, user, duration, reason, send_dm=False)
+
+    # Pardon infractions
 
     @with_role(*constants.MODERATION_ROLES)
     @command()
@@ -165,7 +191,9 @@ class Infractions(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    async def apply_ban(self, ctx: Context, user: FetchedMember, duration: int, reason: str = None) -> None:
+    # Actions
+
+    async def apply_ban(self, ctx: Context, user: FetchedMember, duration: int, reason: str = None, send_dm: bool = True) -> None:
         # Check if user isn't bot
         if await self.check_bot(ctx, user, 'ban'):
             return
@@ -204,21 +232,25 @@ class Infractions(commands.Cog):
             infractions.Infraction(
                 user.id, 'ban', reason, ctx.author.id, datetime.now(), duration, write_to_db=True)
 
-            duration_str = humanize_delta(relativedelta(seconds=duration))
+            if duration == 1_000_000_000:
+                duration_str = 'permanent'
+            else:
+                duration_str = humanize_delta(relativedelta(seconds=duration))
             # Try to send DM with ban details to user
-            try:
-                embed = Embed(
-                    title="**You were banned**",
-                    description=textwrap.dedent(f"""
-                        **Ban length:** {duration_str}
-                        **Reason:** {reason}
-                        If you think that this ban was unreasonable, deal with it, we have no appeal process quite yet
-                        """).strip(),
-                    colour=Colours.soft_red
-                )
-                await user.send(embed=embed)
-            except Forbidden:
-                log.debug("Ban DM wasn't sent, insufficient permissions")
+            if send_dm:
+                try:
+                    embed = Embed(
+                        title="**You were banned**",
+                        description=textwrap.dedent(f"""
+                            **Ban length:** {duration_str}
+                            **Reason:** {reason}
+                            If you think that this ban was unreasonable, deal with it, we have no appeal process quite yet
+                            """).strip(),
+                        colour=Colours.soft_red
+                    )
+                    await user.send(embed=embed)
+                except Forbidden:
+                    log.debug("Ban DM wasn't sent, insufficient permissions")
 
             # Ban the user and send message
             await ctx.guild.ban(user, reason=reason)
@@ -234,7 +266,7 @@ class Infractions(commands.Cog):
         except Forbidden:
             raise BotMissingPermissions('ban')
 
-    async def apply_kick(self, ctx: Context, user: Member, reason: str = None) -> None:
+    async def apply_kick(self, ctx: Context, user: Member, reason: str = None, send_dm: bool = True) -> None:
         # Check if user isn't bot
         if await self.check_bot(ctx, user, 'ban'):
             return
@@ -250,18 +282,21 @@ class Infractions(commands.Cog):
         self.mod_log.ignore(Event.member_remove, user.id)
 
         try:
-            # Try to send DM with kick details to user
-            try:
-                embed = Embed(
-                    title="**You were kicked**",
-                    description=textwrap.dedent(f"""
-                        **Reason:** {reason}
-                        """).strip(),
-                    colour=Colours.soft_red
-                )
-                await user.send(embed=embed)
-            except Forbidden:
-                log.debug("Kick DM wasn't sent, insufficient permissions")
+
+            if send_dm:
+                # Try to send DM with kick details to user
+                try:
+                    embed = Embed(
+                        title="**You were kicked**",
+                        description=textwrap.dedent(f"""
+                            **Reason:** {reason}
+                            """).strip(),
+                        colour=Colours.soft_red
+                    )
+                    await user.send(embed=embed)
+                except Forbidden:
+                    log.debug("Kick DM wasn't sent, insufficient permissions")
+
             await ctx.guild.kick(user, reason=reason)
             await ctx.send(f':exclamation:User {user.mention} has been kicked ({reason})')
             log.info(
