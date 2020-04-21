@@ -1,19 +1,16 @@
-import random
 import logging
+import random
 import re
 from typing import Optional
 
-from discord import Colour, Embed, Message, TextChannel, User, Member
+from discord import Colour, Embed, Member, Message, TextChannel, User
 from discord.ext.commands import Cog, Context, group
 
 from bot.bot import Bot
-from bot.utils.checks import with_role_check, has_higher_role_check
+from bot.constants import (MODERATION_ROLES, NEGATIVE_REPLIES, STAFF_ROLES,
+                           Channels, CleanMessages, Colours, Event, Icons)
 from bot.decorators import with_role
-from bot.constants import (
-    CleanMessages, NEGATIVE_REPLIES,
-    Colours, Event, Icons, Channels,
-    STAFF_ROLES, MODERATION_ROLES
-)
+from bot.utils.checks import has_higher_role_check, with_role_check
 
 log = logging.getLogger(__name__)
 
