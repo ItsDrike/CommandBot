@@ -168,6 +168,9 @@ class Information(Cog):
     @command(name="infractions", aliases=["show_infractions"])
     async def infractions(self, ctx: Context, user: FetchedMember = None) -> None:
         '''Return user's infractions'''
+
+        # TODO: Handle too long message
+
         if user is None:
             user = ctx.author
 
@@ -369,7 +372,7 @@ class Information(Cog):
             infraction_counter = defaultdict(int)
             for infraction in infs:
                 infraction_type = infraction.type
-                infraction_active = 'active' if infraction.active else 'inactive'
+                infraction_active = 'active' if infraction.is_active else 'inactive'
 
                 infraction_types.add(infraction_type)
                 infraction_counter[f"{infraction_active} {infraction_type}"] += 1
