@@ -42,5 +42,7 @@ logging.getLogger('asyncio').setLevel(logging.INFO)
 logging.getLogger('bot.utils.checks').setLevel(logging.INFO)
 logging.getLogger('bot.pagination').setLevel(logging.INFO)
 logging.getLogger('bot.utils.infractions').setLevel(logging.INFO)
+logging.getLogger('bot.utils.scheduling').setLevel(logging.INFO)
+logging.getLogger('bot.decorators').setLevel(logging.INFO)
 
 logging.getLogger(__name__)

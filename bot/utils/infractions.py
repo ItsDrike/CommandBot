@@ -1,16 +1,12 @@
 import datetime
 import logging
-from collections import defaultdict
 
 from dateutil.relativedelta import relativedelta
-from discord import Guild, Object
-from discord.errors import NotFound
 
 from bot import constants
-from bot.bot import Bot
 from bot.database import SQLite
 from bot.utils import time
-from bot.utils.converters import FetchedMember
+from bot.cogs.moderation.utils import UserSnowflake
 
 log = logging.getLogger(__name__)
 
@@ -81,13 +77,17 @@ class Infraction:
         log.debug(
             f'Adding infraction {self.type} to {self.user_id} by {self.actor_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]')
 
-        sql_command = f'''INSERT INTO infractions VALUES(
+        sql_write_command = f'''INSERT INTO infractions VALUES(
                         {self.user_id}, "{self.type}", "{self.reason}", "{self.actor_id}",
                         "{self.str_start}", {self.duration}, {int(self.is_active)}
-                        );
-                        '''
+                        );'''
+        sql_find_command = f'''SELECT rowid FROM infractions WHERE(
+                        UID={self.user_id} and Type="{self.type}" and Reason="{self.reason}" and ActorID={self.actor_id} and Start="{self.str_start}" and Duration={self.duration} and Active={int(self.is_active)}
+                        );'''
         db = SQLite()
-        db.execute(sql_command)
+        db.execute(sql_write_command)
+        db.execute(sql_find_command)
+        self.id = db.cur.fetchone()[0]
         db.close()
 
     def make_inactive(self) -> None:
@@ -100,29 +100,6 @@ class Infraction:
         db = SQLite()
         db.execute(sql_command)
         db.close()
-
-    async def pardon(self, guild: Guild, bot: Bot, force: bool = False) -> None:
-        # Ignore already pardoned infractions
-        if not self.is_active:
-            return
-
-        if not force:
-            if self.type == 'ban':
-                user = await bot.fetch_user(self.user_id)
-
-                try:
-                    await guild.unban(user)
-                    log.info(f'User {user} ({self.user_id}) has been unbanned')
-                except NotFound:
-                    log.info(
-                        f"User {user} ({self.user_id}) isn't banned, but found an active ban infraction")
-            if self.type == 'mute':
-                user = guild.get_member(self.user_id)
-
-                await user.remove_roles(Object(constants.Roles.muted))
-                log.info(f'User {user} ({self.user_id}) has been unmuted')
-
-        self.make_inactive()
 
 
 def get_infraction_by_row(row_id: int) -> Infraction:
@@ -156,7 +133,7 @@ def get_all_active_infractions(inf_type: str = None) -> list:
         return all_infractions
 
 
-def get_infractions(user: FetchedMember, inf_type: str = None) -> list:
+def get_infractions(user: UserSnowflake, inf_type: str = None) -> list:
     log.debug(f'Getting infractions of {user}')
 
     # Get all infractions from database
@@ -174,7 +151,7 @@ def get_infractions(user: FetchedMember, inf_type: str = None) -> list:
         return all_infractions
 
 
-def get_active_infractions(user: FetchedMember, inf_type: str = None) -> list:
+def get_active_infractions(user: UserSnowflake, inf_type: str = None) -> list:
     log.debug(f'Getting active infractions of {user}')
 
     # Get all infractions from database
@@ -193,7 +170,7 @@ def get_active_infractions(user: FetchedMember, inf_type: str = None) -> list:
         return all_infractions
 
 
-def get_inactive_infractions(user: FetchedMember, inf_type: str = None) -> list:
+def get_inactive_infractions(user: UserSnowflake, inf_type: str = None) -> list:
     log.debug(f'Getting inactive infractions of {user}')
 
     # Get all infractions from database
@@ -212,45 +189,8 @@ def get_inactive_infractions(user: FetchedMember, inf_type: str = None) -> list:
         return all_infractions
 
 
-async def pardon_last_infraction(guild: Guild, user: FetchedMember, inf_type: str = None, force: bool = False) -> None:
-    # Get all active infractions of given user
-    infractions = get_active_infractions(user, inf_type)
-    # Pardon last infraction
-    await infractions[-1].pardon(guild, force=force)
-
-
-async def check_infractions_expiry(bot: Bot, inf_type: str = None) -> None:
-    guild = bot.get_guild(constants.Guild.id)
-    active_infractions = get_all_active_infractions(inf_type=inf_type)
-    type_infractions = defaultdict(list)
-    for infraction in active_infractions:
-        type_infractions[infraction.type].append(infraction)
-
-    for infraction in active_infractions:
-        # Check if infraction is no longer active by duration
-        if not infraction.active:
-            for inf in type_infractions[infraction.type]:
-                # There is other infraction of the same type with is still active by duration
-                if inf.active:
-                    # Deactivate infraction without pardoning the action it represents
-                    await infraction.pardon(guild, bot, force=True)
-                    break
-            # If there is no other active infraction of the same type
-            else:
-                # Infraction expired, de-activate it
-                await infraction.pardon(guild, bot)
-
-
-async def remove_infraction(guild: Guild, bot: Bot, row_id: int) -> Infraction:
+def remove_infraction(infraction: Infraction) -> None:
+    row_id = infraction.id
     db = SQLite()
-    db.execute(f'SELECT *, rowid FROM infractions WHERE rowid={row_id}')
-    try:
-        infraction = Infraction(*db.cur.fetchone())
-        await infraction.pardon(guild, bot)
-        db.execute(f'DELETE FROM infractions WHERE rowid={row_id}')
-        log.info(f'Removed infraction #{row_id}')
-    except TypeError:
-        infraction = False
+    db.execute(f'DELETE FROM infractions WHERE rowid={row_id}')
     db.close()
-
-    return infraction
