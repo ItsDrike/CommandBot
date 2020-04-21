@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 
 from dateutil.relativedelta import relativedelta
-from discord import Guild
+from discord import Guild, Object
 from discord.errors import NotFound
 
 from bot import constants
@@ -106,16 +106,21 @@ class Infraction:
         if not self.is_active:
             return
 
-        user = await bot.fetch_user(self.user_id)
-
         if not force:
             if self.type == 'ban':
+                user = await bot.fetch_user(self.user_id)
+
                 try:
                     await guild.unban(user)
                     log.info(f'User {user} ({self.user_id}) has been unbanned')
                 except NotFound:
                     log.info(
                         f"User {user} ({self.user_id}) isn't banned, but found an active ban infraction")
+            if self.type == 'mute':
+                user = guild.get_member(self.user_id)
+
+                await user.remove_roles(Object(constants.Roles.muted))
+                log.info(f'User {user} ({self.user_id}) has been unmuted')
 
         self.make_inactive()
 

@@ -4,7 +4,7 @@ import textwrap
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
-from discord import Colour, Embed, Member
+from discord import Colour, Embed, Member, Object
 from discord.errors import Forbidden
 from discord.ext import commands
 from discord.ext.commands import Context, command
@@ -99,9 +99,15 @@ class Infractions(commands.Cog):
 
         await self.apply_ban(ctx, user, duration, reason)
 
-    # TODO: Add mute & unmute
+    @with_role(*constants.STAFF_ROLES)
+    @command(aliases=['mute'])
+    async def tempmute(self, ctx: Context, user: Member, duration: Expiry, *, reason: str = None) -> None:
+        """Temporarily mute a user for the given reason and duration."""
+
+        await self.apply_mute(ctx, user, duration, reason)
 
     # Shadow infractions
+
     @with_role(*constants.MODERATION_ROLES)
     @command(hidden=True, aliases=['shadowkick', 'skick'])
     async def shadow_kick(self, ctx: Context, user: Member, *, reason: str = None) -> None:
@@ -122,6 +128,13 @@ class Infractions(commands.Cog):
         """Temporarily ban a user for the given reason and duration without notifying the user."""
 
         await self.apply_ban(ctx, user, duration, reason, send_dm=False)
+
+    @with_role(*constants.MODERATION_ROLES)
+    @command(hidden=True, aliases=['shadowtempmute', 'stempmute', 'shadowmute', 'smute'])
+    async def shadow_tempmute(self, ctx: Context, user: Member, duration: Expiry, *, reason: str = None) -> None:
+        """Temporarily mute a user for the given reason and duration without notifying the user."""
+
+        await self.apply_mute(ctx, user, duration, reason, send_dm=False)
 
     # Pardon infractions
 
@@ -303,3 +316,75 @@ class Infractions(commands.Cog):
                 f'User {user} has been kicked by {ctx.author}, reason: {reason}')
         except Forbidden:
             raise BotMissingPermissions('kick')
+
+    async def apply_mute(self, ctx: Context, user: Member, duration: int, reason: str = None, send_dm: bool = True) -> None:
+        # Check if user isn't bot
+        if await self.check_bot(ctx, user, 'mute'):
+            return
+        # Check if author has permission to mute this user
+        if not await self.check_role(ctx, user, 'mute'):
+            return
+
+        # Get current user's active mutes
+        infs = infractions.get_active_infractions(
+            user, inf_type='mute')
+
+        # Determine if the user has any active mute infractions that override the current one
+        for infraction in infs:
+            if infraction.stop > (datetime.now() + relativedelta(seconds=duration)):
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description=f"This user is already muted\n(Currents mute ends at: {infraction.stop})",
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
+            if infraction.duration == 1_000_000_000:
+                embed = Embed(
+                    title=random.choice(constants.NEGATIVE_REPLIES),
+                    description=f"This user is already muted permanently",
+                    color=constants.Colours.soft_red
+                )
+                await ctx.send(embed=embed)
+                return
+
+        try:
+            # Add an infraction to user
+            infractions.Infraction(
+                user.id, 'mute', reason, ctx.author.id, datetime.now(), duration, write_to_db=True)
+
+            if duration == 1_000_000_000:
+                duration_str = 'permanent'
+            else:
+                duration_str = humanize_delta(relativedelta(seconds=duration))
+            # Try to send DM with ban details to user
+            if send_dm:
+                try:
+                    embed = Embed(
+                        title="**You were muted**",
+                        description=textwrap.dedent(f"""
+                            **Mute length:** {duration_str}
+                            **Reason:** {reason}
+                            """).strip(),
+                        colour=Colours.soft_red
+                    )
+                    await user.send(embed=embed)
+                except Forbidden:
+                    log.debug("Ban DM wasn't sent, insufficient permissions")
+
+            # Give user the muted role and kick him from voice channels
+            self.mod_log.ignore(Event.member_update, user.id)
+            await user.add_roles(Object(constants.Roles.muted), reason=reason)
+            await user.move_to(None, reason=reason)
+
+            if duration != 1_000_000_000:
+                message = f":exclamation:User {user.mention} has been muted for {duration_str} ({reason})"
+                log_msg = f"User {user} has been muted by {ctx.author}, duration: {duration_str}, reason: {reason}"
+            else:
+                message = f":exclamation:User {user.mention} has been **permanently** muted ({reason})"
+                log_msg = f"User {user} has been permanently muted by {ctx.author}, reason: {reason}"
+            await ctx.send(message)
+
+            log.info(log_msg)
+        except Forbidden:
+            raise BotMissingPermissions('ban')
