@@ -138,6 +138,7 @@ class Roles(metaclass=YAMLGetter):
     section = 'guild'
     subsection = 'roles'
 
+    staff: int
     guests: int
     members: int
     owners: int
@@ -238,6 +239,8 @@ class Emojis(metaclass=YAMLGetter):
     defcon_enabled: str
     defcon_updated: str
 
+    failmail: str
+
     status_online: str
     status_idle: str
     status_dnd: str
@@ -267,6 +270,8 @@ class Icons(metaclass=YAMLGetter):
     message_delete: str
     message_edit: str
 
+    token_removed: str
+
     sign_in: str
     sign_out: str
 
@@ -277,6 +282,7 @@ class Icons(metaclass=YAMLGetter):
     user_update: str
     user_mute: str
     user_unmute: str
+    user_verified: str
     user_warn: str
 
     hash_blupre: str

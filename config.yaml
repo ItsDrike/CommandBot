@@ -57,6 +57,7 @@ guild:
         members:                             697819236969480244
 
         # Staff
+        staff:                              702142528438272050
         owners:             &OWNERS_ROLE    697467112851112036
         admins:             &ADMINS_ROLE    608630199780900874
         mods:               &MODS_ROLE      697463912404090930
@@ -196,6 +197,8 @@ style:
         defcon_enabled:  "<:defconenabled:470326274213150730>"
         defcon_updated:  "<:defconsettingsupdated:470326274082996224>"
 
+        failmail: "<:failmail:633660039931887616>"
+
         status_online:  "\U0001f7e2"
         status_idle:    "\U0001f7e0"
         status_dnd:     "\U0001f534"
@@ -221,6 +224,8 @@ style:
         message_delete:      "https://cdn.discordapp.com/emojis/472472641320648704.png"
         message_edit:        "https://cdn.discordapp.com/emojis/472472638976163870.png"
 
+        token_removed: "https://cdn.discordapp.com/emojis/470326273298792469.png"
+
         sign_in:  "https://cdn.discordapp.com/emojis/469952898181234698.png"
         sign_out: "https://cdn.discordapp.com/emojis/469952898089091082.png"
 
@@ -232,6 +237,7 @@ style:
 
         user_mute:     "https://cdn.discordapp.com/emojis/472472640100106250.png"
         user_unmute:   "https://cdn.discordapp.com/emojis/472472639206719508.png"
+        user_verified: "https://cdn.discordapp.com/emojis/470326274519334936.png"
 
         user_warn: "https://cdn.discordapp.com/emojis/470326274238447633.png"
 
