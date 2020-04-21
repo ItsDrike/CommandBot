@@ -92,7 +92,7 @@ async def wait_until(time: datetime.datetime, start: Optional[datetime.datetime]
     :param time: A datetime.datetime object to wait until.
     :param start: The start from which to calculate the waiting duration. Defaults to UTC time.
     """
-    delay = time - (start or datetime.datetime.utcnow())
+    delay = time - (start or datetime.datetime.now())
     delay_seconds = delay.total_seconds()
 
     # Incorporate a small delay so we don't rapid-fire the event due to time precision errors
