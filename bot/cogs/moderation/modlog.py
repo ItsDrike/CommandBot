@@ -289,7 +289,7 @@ class ModLog(Cog, name="ModLog"):
         # Check if there are no infractions for this ban, if there aren't log it
         if len(infs) == 0:
             infractions.Infraction(
-                member.id, 'ban', 'Unknown/Server banned', 100000000000000000, datetime.now(), 1_000_000_000, write_to_db=True)
+                member.id, 'ban', 'Unknown/Server banned', self.bot.user.id, datetime.now(), 1_000_000_000, write_to_db=True)
 
         await self.send_log_message(
             Icons.user_ban, Colours.soft_red,
