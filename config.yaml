@@ -197,8 +197,6 @@ style:
         defcon_enabled:  "<:defconenabled:470326274213150730>"
         defcon_updated:  "<:defconsettingsupdated:470326274082996224>"
 
-        failmail: "<:failmail:633660039931887616>"
-
         status_online:  "\U0001f7e2"
         status_idle:    "\U0001f7e0"
         status_dnd:     "\U0001f534"

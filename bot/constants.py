@@ -239,8 +239,6 @@ class Emojis(metaclass=YAMLGetter):
     defcon_enabled: str
     defcon_updated: str
 
-    failmail: str
-
     status_online: str
     status_idle: str
     status_dnd: str
