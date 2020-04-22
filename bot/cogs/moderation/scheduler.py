@@ -239,7 +239,6 @@ class InfractionScheduler(Scheduler):
             log_text = f"Unable to deactivate infraction {id_}, it is not active"
             log.info(log_text)
             if send_log:
-                # TODO: Could be an error
                 await self.mod_log.send_log_message(
                     icon_url=constants.Icons.defcon_denied,
                     colour=Colours.soft_red,
