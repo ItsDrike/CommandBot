@@ -1,7 +1,7 @@
 import logging
 import os
-from typing import Dict, List
 from enum import Enum
+from typing import Dict, List
 
 import yaml
 

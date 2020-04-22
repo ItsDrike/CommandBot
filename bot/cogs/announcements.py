@@ -4,11 +4,11 @@ from discord.ext import commands
 from discord.ext.commands import Context, command
 
 from bot.bot import Bot
-from bot.constants import Roles, Channels, STAFF_ROLES
+from bot.constants import STAFF_ROLES
 from bot.constants import Bot as BotConstant
-
-from bot.utils.checks import without_role_check, with_role_check
+from bot.constants import Channels, Roles
 from bot.decorators import in_channel
+from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)
 

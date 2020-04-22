@@ -1,6 +1,7 @@
 
-import sqlite3 as lite
 import logging
+import sqlite3 as lite
+
 from bot.constants import Database
 
 log = logging.getLogger(__name__)

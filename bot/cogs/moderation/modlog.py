@@ -12,10 +12,11 @@ from discord import Colour
 from discord.ext.commands import Cog, Context
 from discord.utils import escape_markdown
 
-from bot.constants import Channels, Colours, Emojis, Event, Guild as GuildConstant, Icons
-from bot.constants import Roles
-from bot.utils.time import humanize_delta
+from bot.constants import Channels, Colours, Emojis, Event
+from bot.constants import Guild as GuildConstant
+from bot.constants import Icons, Roles
 from bot.utils import infractions
+from bot.utils.time import humanize_delta
 
 log = logging.getLogger(__name__)
 

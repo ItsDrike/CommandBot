@@ -7,17 +7,17 @@ from typing import Union
 
 from discord import Colour, Embed, HTTPException, Message, Reaction, User
 from discord.ext import commands
-from discord.ext.commands import CheckFailure, Cog as DiscordCog, Command, Context
+from discord.ext.commands import CheckFailure
+from discord.ext.commands import Cog as DiscordCog
+from discord.ext.commands import Command, Context
 from fuzzywuzzy import fuzz, process
 
 from bot import constants
 from bot.bot import Bot
-from bot.constants import Channels, Emojis, STAFF_ROLES
+from bot.constants import STAFF_ROLES, Channels, Emojis
 from bot.decorators import redirect_output
-from bot.pagination import (
-    FIRST_EMOJI, LAST_EMOJI,
-    LEFT_EMOJI, LinePaginator, RIGHT_EMOJI,
-)
+from bot.pagination import (FIRST_EMOJI, LAST_EMOJI, LEFT_EMOJI, RIGHT_EMOJI,
+                            LinePaginator)
 
 DELETE_EMOJI = Emojis.delete
 

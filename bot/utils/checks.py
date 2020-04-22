@@ -2,8 +2,9 @@ import datetime
 import logging
 from typing import Callable, Iterable
 
-from discord.ext.commands import BucketType, Cog, Command, CommandOnCooldown, Context, Cooldown, CooldownMapping
 from discord import Member
+from discord.ext.commands import (BucketType, Cog, Command, CommandOnCooldown,
+                                  Context, Cooldown, CooldownMapping)
 
 log = logging.getLogger(__name__)
 

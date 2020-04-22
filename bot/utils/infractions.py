@@ -4,9 +4,9 @@ import logging
 from dateutil.relativedelta import relativedelta
 
 from bot import constants
+from bot.cogs.moderation.utils import UserSnowflake
 from bot.database import SQLite
 from bot.utils import time
-from bot.cogs.moderation.utils import UserSnowflake
 
 log = logging.getLogger(__name__)
 
