@@ -316,7 +316,7 @@ class ModLog(Cog, name="ModLog"):
             message = f"{Emojis.new} {message}"
 
         guest_role = member.guild.get_role(Roles.guests)
-        await member.add_roles(guest_role)
+        await member.add_roles(guest_role, reason='AutoRole')
 
         log.info(f'User {member} has joined')
 
