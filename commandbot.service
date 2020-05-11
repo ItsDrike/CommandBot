@@ -1,9 +1,13 @@
 [Unit]
-Description=Command Bot
+Description=CommandBot
+After=network.target
 
 [Service]
-ExecStart=/usr/bin/commandbot
+WorkingDirectory=/home/koumakpet/CommandBot
+
 Restart=on-failure
+
+ExecStart=pipenv run python start.py
 
 [Install]
 WantedBy=multi-user.target

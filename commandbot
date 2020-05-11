@@ -1,4 +1,0 @@
-#!/bin/sh
-dir='/home/koumakpet/CommandBot'
-cd $dir
-pipenv run python start.py
