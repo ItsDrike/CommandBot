@@ -37,6 +37,35 @@ def proxy_user(user_id: str) -> discord.Object:
     return user
 
 
+class DiceThrow(Converter):
+    """Convert dice throw strings into tuple[int, int]"""
+    dice_parser = re.compile(
+        r"(^(?P<throws>[1-9]+\d*?)[dD](?P<sides>[1-9]\d*?)$)"
+    )
+
+    @classmethod
+    async def convert(self, ctx: Context, dice_string: str) -> t.Tuple[int, int]:
+        """
+        Converts a `dice_string` to a Tuple[int, int] object
+
+        The converter supports the following syntax:
+        * XdY or XDY,
+            - where X is a non-zero number (optional - can be left out) [dice throws]
+            - where Y is a non-zero number (must be present) [dice sides]
+        """
+        match = self.dice_parser.fullmatch(dice_string)
+        if not match:
+            raise BadArgument(
+                f"`{dice_string}` is not a valid dice throw string.")
+
+        dice_dict = {
+            param: int(amount)
+            for param, amount in match.groupdict(default=1).items()
+        }
+
+        return (dice_dict['throws'], dice_dict['sides'])
+
+
 class Duration(Converter):
     """Convert duration strings into UTC datetime.datetime objects."""
 
