@@ -7,6 +7,7 @@ guild:
 
     channels:
         announcements:                      697817678043152424
+        rules:                              710294776292835350
 
         # Social
         global:                             697817811325681678
@@ -72,6 +73,33 @@ guild:
         - *ADMINS_ROLE
         - *MODS_ROLE
         - *T_MODS_ROLE
+
+details:
+    rules:
+        1:
+            title:          "Be respectful"
+            description:    "Respect others, don't try to force your opinion on someone"
+        2:
+            title:          "No Racism/Hate Speech"
+            description:    "Racism, sexism, etc. will not be tolerated in this server.\nThis also applies to custom statuses"
+        3:
+            title:          "Do not send Malicious Content"
+            description:    "Sending/Linking any harmful material such as viruses, IP grabbers, etc. will result in an immediate and permanent ban."
+        4:
+            title:          "Do not spam"
+            description:    "Do not spam messages, emojis, pictures or links"
+        5:
+            title:          "No Advertising"
+            description:    "Applies for Discord, YouTube, etc.\nIf your main purpose is to come to this server and advertise you will be banned"
+        6:
+            title:          "No Punishment Evasion"
+            description:    "Do not attempt to evade any punishment you receive\nIf you are caught doing it, it will result in kick/ban"
+        7:
+            title:          "Try to use the right channels"
+            description:    "All channels have their description, please use them accordingly to it"
+        8:
+            title:          "Respect Discord's Terms of Service"
+            description:   "Anything that breaks these terms will not be tolerated.\nBreaking TOS of Discord will result in an immediate ban.\nWe may also report you to Discord for breaking them.\nYou can view them here: https://discordapp.com/terms/"
 
 database:
     db_name: "users.db"

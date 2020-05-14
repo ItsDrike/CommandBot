@@ -255,6 +255,26 @@ class Information(Cog):
 
         await ctx.send(embed=embed)
 
+    @command()
+    async def rules(self, ctx: Context) -> None:
+        rules_channel = ctx.guild.get_channel(constants.Channels.rules)
+        await ctx.send(f'Please read the server rules at: {rules_channel.mention}')
+
+    @command()
+    async def rule(self, ctx: Context, number: int):
+        rules = constants.Rules.rules
+        try:
+            rule = rules[number]
+        except KeyError:
+            await ctx.send(f":x: No such rule ({number})")
+            return
+
+        embed = Embed(
+            title=f"#{number}: {rule['title']}",
+            description=rule['description'],
+            color=Colour.blurple()
+        )
+        await ctx.send(embed=embed)
     # region: Infractions sub-functions
 
     async def create_user_embed(self, ctx: Context, user: FetchedMember) -> Embed:

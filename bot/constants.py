@@ -183,6 +183,7 @@ class Channels(metaclass=YAMLGetter):
     subsection = 'channels'
 
     announcements: int
+    rules: int
 
     off_topic: int
     ask_for_help: int
@@ -200,6 +201,11 @@ class Channels(metaclass=YAMLGetter):
     voice_log: int
     user_log: int
     mod_log: int
+
+
+class Rules(metaclass=YAMLGetter):
+    section = 'details'
+    rules: Dict[int, Dict[str, str]]
 
 
 class Database(metaclass=YAMLGetter):
