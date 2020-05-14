@@ -1,6 +1,8 @@
 import logging
 import os
+from collections.abc import Mapping
 from enum import Enum
+from pathlib import Path
 from typing import Dict, List
 
 import yaml
@@ -8,6 +10,7 @@ import yaml
 # Paths
 BOT_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(BOT_DIR, os.pardir))
+DEFAULT_CONFIG_FILE = os.path.join(PROJECT_ROOT, 'default_config.yaml')
 CONFIG_FILE = os.path.join(PROJECT_ROOT, 'config.yaml')
 
 log = logging.getLogger(__name__)
@@ -49,8 +52,34 @@ def _env_var_constructor(loader, node):
 
 yaml.SafeLoader.add_constructor('!ENV', _env_var_constructor)
 
-with open(CONFIG_FILE, encoding='UTF-8') as f:
+with open(DEFAULT_CONFIG_FILE, encoding='UTF-8') as f:
     _CONFIG_YAML = yaml.safe_load(f)
+
+
+def _recursive_update(original, new):
+    """
+    Helper method which implements a recursive `dict.update`
+    method, used for updating the original configuration with
+    configuration specified by the user.
+    """
+
+    for key, value in original.items():
+        if key not in new:
+            continue
+
+        if isinstance(value, Mapping):
+            if not any(isinstance(subvalue, Mapping) for subvalue in value.values()):
+                original[key].update(new[key])
+            _recursive_update(original[key], new[key])
+        else:
+            original[key] = new[key]
+
+
+if Path(CONFIG_FILE).exists():
+    log.info("Found user config file, loading constants from it.")
+    with open(CONFIG_FILE, encoding="UTF-8") as f:
+        user_config = yaml.safe_load(f)
+    _recursive_update(_CONFIG_YAML, user_config)
 
 
 class YAMLGetter(type):

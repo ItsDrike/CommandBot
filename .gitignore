@@ -15,3 +15,6 @@ __pycache__/
 
 # Ignore the database file, should stay private
 users.db
+
+# Ignore custom user-config file
+config.yaml
