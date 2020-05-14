@@ -4,7 +4,7 @@ import random
 import textwrap
 from collections import Counter, defaultdict
 from string import Template
-from typing import Any, Mapping, Optional, Union
+from typing import Union
 
 from discord import Colour, Embed, Guild, Member, Role, Status, utils
 from discord.ext.commands import Cog, Context, command
@@ -255,6 +255,8 @@ class Information(Cog):
 
         await ctx.send(embed=embed)
 
+    # region: Infractions sub-functions
+
     async def create_user_embed(self, ctx: Context, user: FetchedMember) -> Embed:
         """Creates an embed containing information on the `user`."""
         created = time_since(user.created_at, max_units=3)
@@ -462,40 +464,7 @@ class Information(Cog):
 
         return '\n'.join(infraction_output)
 
-    def format_fields(self, mapping: Mapping[str, Any], field_width: Optional[int] = None) -> str:
-        """Format a mapping to be readable to a human."""
-        # sorting is technically superfluous but nice if you want to look for a specific field
-        fields = sorted(mapping.items(), key=lambda item: item[0])
-
-        if field_width is None:
-            field_width = len(max(mapping.keys(), key=len))
-
-        out = ''
-
-        for key, val in fields:
-            if isinstance(val, dict):
-                # if we have dicts inside dicts we want to apply the same treatment to the inner dictionaries
-                inner_width = int(field_width * 1.6)
-                val = '\n' + self.format_fields(val, field_width=inner_width)
-
-            elif isinstance(val, str):
-                # split up text since it might be long
-                text = textwrap.fill(val, width=100, replace_whitespace=False)
-
-                # indent it, I guess you could do this with `wrap` and `join` but this is nicer
-                val = textwrap.indent(text, ' ' * (field_width + len(': ')))
-
-                # the first line is already indented so we `str.lstrip` it
-                val = val.lstrip()
-
-            if key == 'color':
-                # makes the base 10 representation of a hex number readable to humans
-                val = hex(val)
-
-            out += '{0:>{width}}: {1}\n'.format(key, val, width=field_width)
-
-        # remove trailing whitespace
-        return out.rstrip()
+    # endregion: Infractions sub-functions
 
 
 def setup(bot: Bot) -> None:
