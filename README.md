@@ -40,12 +40,16 @@ If you want to try and run this bot on your own, follow this guide:
 
 ### Using Systemd
 
-There is an option to use systemd on Linux to run this bot using the **commandbot.service** file. This can be good to restart on unexpected crashes and automatic starting on boot of your machine.
+There is an option to use systemd on Linux to run this bot using the **commandbot.service** file. This can be good to restart on unexpected crashes, automatic starting on boot of your machine and running in the background.
+
+Note that you need to [**Install Linux Screen**](https://linuxize.com/post/how-to-use-linux-screen/) so that you can access the output at any time.\
+(If you don't want this, you can adjust the **commandbot.service** to fit your needs)
 
 1. Create a symbolic link to the **commandbot.service** in **/etc/systemd/system** `sudo ln -s [absolute path to commandbot.service] /etc/systemd/system/commandbot.service`
 2. Reload the daemon `sudo systemctl daemon-reload`
 3. \[OPTIONAL\] Start the bot on boot `sudo systemctl enable commandbot.service`
 4. Start the bot service `sudo systemctl start commandbot.service`
+5. If you need to check the output, you can use `sudo screen -R CommandBot` (`Ctrl-A-D` to detach)
 
 ## Bot Configuration
 
