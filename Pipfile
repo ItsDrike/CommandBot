@@ -16,6 +16,7 @@ deepdiff = "*"
 fuzzywuzzy = "*"
 python-levenshtein = "*"
 sentry-sdk = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.8"
