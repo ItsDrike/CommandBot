@@ -7,7 +7,7 @@ WorkingDirectory=/home/koumakpet/CommandBot
 
 Restart=on-failure
 
-ExecStart=pipenv run python start.py
+ExecStart=/usr/bin/screen -DmS CommandBot pipenv run python start.py
 
 [Install]
 WantedBy=multi-user.target
