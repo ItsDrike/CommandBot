@@ -257,11 +257,13 @@ class Information(Cog):
 
     @command()
     async def rules(self, ctx: Context) -> None:
+        """Show link to rules channel"""
         rules_channel = ctx.guild.get_channel(constants.Channels.rules)
         await ctx.send(f'Please read the server rules at: {rules_channel.mention}')
 
     @command()
-    async def rule(self, ctx: Context, number: int):
+    async def rule(self, ctx: Context, number: int) -> None:
+        """Show detailed info about given rule"""
         rules = constants.Rules.rules
         try:
             rule = rules[number]
