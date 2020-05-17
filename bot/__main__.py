@@ -32,6 +32,7 @@ client.load_extension('bot.cogs.moderation')
 client.load_extension('bot.cogs.information')
 client.load_extension('bot.cogs.clean')
 client.load_extension('bot.cogs.announcements')
+client.load_extension('bot.cogs.chat')
 client.load_extension('bot.cogs.fun')
 
 if constants.Bot.token:
