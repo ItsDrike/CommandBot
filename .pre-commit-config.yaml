@@ -20,7 +20,7 @@ repos:
       - id: flake8
         name: Flake8
         description: This hook runs flake8 within our project's pipenv environment.
-        entry: pipenv run flake8
+        entry: pipenv run flake8 --config flake8.cfg
         language: python
         types: [python]
         require_serial: true
