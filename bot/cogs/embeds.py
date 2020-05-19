@@ -53,9 +53,9 @@ class Embeds(Cog):
     @command()
     async def embedshow(self, ctx: Context) -> None:
         """Take a look at the embed"""
-        embed = self.get_embed(ctx)
+        embed = await self.get_embed(ctx)
 
-        if not embed:
+        if embed is False:
             return
 
         await ctx.send(embed=embed)
@@ -63,9 +63,9 @@ class Embeds(Cog):
     @command()
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
-        embed = self.get_embed(ctx)
+        embed = await self.get_embed(ctx)
 
-        if not embed:
+        if embed is False:
             return
 
         channel_perms = channel.permissions_for(ctx.author)
