@@ -1,15 +1,13 @@
+import textwrap
 from collections import defaultdict
 
-from discord import Embed, TextChannel, Colour
+from discord import Colour, Embed, TextChannel
 from discord.ext.commands import Cog, Context, command, group
 
 from bot import constants
 from bot.bot import Bot
-from bot.decorators import with_role
-
 from bot.cogs.moderation.modlog import ModLog
-import textwrap
-
+from bot.decorators import with_role
 
 prefix = constants.Bot.prefix
 
@@ -97,6 +95,7 @@ class Embeds(Cog):
     @embed_group.command(name="title")
     @with_role(*constants.MODERATION_ROLES)
     async def embed_title(self, ctx: Context, *, title: str) -> None:
+        """Set embeds title"""
         embed = await self.get_embed(ctx)
 
         if embed is False:
@@ -109,6 +108,7 @@ class Embeds(Cog):
     @embed_group.command(name="footer")
     @with_role(*constants.MODERATION_ROLES)
     async def embed_footer(self, ctx: Context, *, footer: str) -> None:
+        """Set embeds footer"""
         embed = await self.get_embed(ctx)
 
         if embed is False:
@@ -117,6 +117,20 @@ class Embeds(Cog):
         embed.set_footer(text=footer)
         self.embed[ctx.author] = embed
         await ctx.send("Embeds footer updated")
+
+    @embed_group.command(name="image", aliases=["img"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_image(self, ctx: Context, *, url: str) -> None:
+        """Set embeds image (not passing URL will remove the image)"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.set_image(url=url)
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds Image URL updated")
+
     # endregion
 
     async def get_embed(self, ctx):
