@@ -13,7 +13,7 @@ import textwrap
 prefix = constants.Bot.prefix
 
 
-class Chat(Cog):
+class Embeds(Cog):
     """
     A cog which allows user to send messages using the bot
     """
@@ -93,11 +93,11 @@ class Chat(Cog):
         try:
             embed = self.embed[ctx.author]
         except KeyError:
-            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{prefix}help Embed`)")
+            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{prefix}help Embeds`)")
             return False
         return embed
 
 
 def setup(bot: Bot) -> None:
-    '''Load the Chat cog.'''
-    bot.add_cog(Chat(bot))
+    '''Load the Embeds cog.'''
+    bot.add_cog(Embeds(bot))
