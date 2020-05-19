@@ -1,10 +1,12 @@
+import textwrap
 from collections import defaultdict
 
-from discord import Embed, TextChannel
+from discord import Colour, Embed, TextChannel
 from discord.ext.commands import Cog, Context, command
 
 from bot import constants
 from bot.bot import Bot
+from bot.cogs.moderation.modlog import ModLog
 
 prefix = constants.Bot.prefix
 
@@ -18,6 +20,11 @@ class Chat(Cog):
         self.bot = bot
         self.embed_mode = defaultdict(bool)
         self.embed = {}
+
+    @property
+    def mod_log(self) -> ModLog:
+        """Get currently loaded ModLog cog instance."""
+        return self.bot.get_cog("ModLog")
 
     # region: embed mode
 
@@ -55,7 +62,18 @@ class Chat(Cog):
         try:
             channel_perms = channel.permissions_for(ctx.author)
             if channel_perms.send_messages:
-                await channel.send(embed=self.embed[ctx.author])
+                embed_msg = await channel.send(embed=self.embed[ctx.author])
+                await self.mod_log.send_log_message(
+                    icon_url=constants.Icons.message_edit,
+                    colour=Colour.blurple(),
+                    title="Embed message sent",
+                    thumbnail=ctx.author.avatar_url_as(static_format="png"),
+                    text=textwrap.dedent(f"""
+                        Actor: {ctx.author.mention} (`{ctx.author.id}`)
+                        Channel: {channel.mention}
+                        Message jump link: {embed_msg.jump_url}
+                    """),
+                )
                 await ctx.send(":white_check_mark: Embed sent")
             else:
                 await ctx.send(f":x: Sorry, {ctx.author.mention} you don't have permission to send messages to this channel")
