@@ -52,7 +52,15 @@ class Chat(Cog):
     @command()
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
-        pass
+        try:
+            channel_perms = channel.permissions_for(ctx.author)
+            if channel_perms.send_messages:
+                await channel.send(embed=self.embed[ctx.author])
+                await ctx.send(":white_check_mark: Embed sent")
+            else:
+                await ctx.send(f":x: Sorry, {ctx.author.mention} you don't have permission to send messages to this channel")
+        except KeyError:
+            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{prefix}embedhelp`)")
 
     # endregion
     # region: embed build
