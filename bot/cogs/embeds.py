@@ -105,6 +105,19 @@ class Embeds(Cog):
         self.embed[ctx.author] = embed
         await ctx.send("Embeds title updated")
 
+    @embed_group.command(name="description")
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_description(self, ctx: Context, *, description: str) -> None:
+        """Set embeds title"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.description = description
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds description updated")
+
     @embed_group.command(name="footer")
     @with_role(*constants.MODERATION_ROLES)
     async def embed_footer(self, ctx: Context, *, footer: str) -> None:
