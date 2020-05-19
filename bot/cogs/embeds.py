@@ -1,10 +1,11 @@
 from collections import defaultdict
 
 from discord import Embed, TextChannel, Colour
-from discord.ext.commands import Cog, Context, command
+from discord.ext.commands import Cog, Context, command, group
 
 from bot import constants
 from bot.bot import Bot
+from bot.decorators import with_role
 
 from bot.cogs.moderation.modlog import ModLog
 import textwrap
@@ -87,6 +88,23 @@ class Embeds(Cog):
 
     # endregion
     # region: embed build
+    @group(invoke_without_command=True, name='embed', aliases=["embedset"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_group(self, ctx: Context) -> None:
+        '''Commands for configuring the Embed message'''
+        await ctx.invoke(self.bot.get_command('help'), 'embed')
+
+    @embed_group.command(name="title")
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_title(self, ctx: Context, *, title: str) -> None:
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.title = title
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds title updated")
     # endregion
 
     async def get_embed(self, ctx):
