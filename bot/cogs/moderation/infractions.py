@@ -199,7 +199,7 @@ class Infractions(InfractionScheduler, commands.Cog):
             if inf.duration == 1_000_000_000:
                 embed = Embed(
                     title=random.choice(constants.NEGATIVE_REPLIES),
-                    description=f"This user is already banned permanently",
+                    description="This user is already banned permanently",
                     color=constants.Colours.soft_red
                 )
                 await ctx.send(embed=embed)
@@ -251,7 +251,7 @@ class Infractions(InfractionScheduler, commands.Cog):
             if inf.duration == 1_000_000_000:
                 embed = Embed(
                     title=random.choice(constants.NEGATIVE_REPLIES),
-                    description=f"This user is already muted permanently",
+                    description="This user is already muted permanently",
                     color=constants.Colours.soft_red
                 )
                 await ctx.send(embed=embed)

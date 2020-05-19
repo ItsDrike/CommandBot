@@ -150,7 +150,7 @@ class LinePaginator(Paginator):
 
         if not lines:
             if exception_on_empty_embed:
-                log.exception(f"Pagination asked for empty lines iterable")
+                log.exception("Pagination asked for empty lines iterable")
                 raise EmptyPaginatorEmbed("No lines to paginate")
 
             log.debug(
@@ -378,7 +378,7 @@ class ImagePaginator(Paginator):
 
         if not pages:
             if exception_on_empty_embed:
-                log.exception(f"Pagination asked for empty image list")
+                log.exception("Pagination asked for empty image list")
                 raise EmptyPaginatorEmbed("No images to paginate")
 
             log.debug(

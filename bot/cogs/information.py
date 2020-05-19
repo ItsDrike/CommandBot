@@ -184,7 +184,7 @@ class Information(Cog):
             embed = Embed(
                 color=constants.Colours.soft_red,
                 title=random.choice(constants.NEGATIVE_REPLIES),
-                description=f'You may not use this command on users with higher role than yours'
+                description='You may not use this command on users with higher role than yours'
             )
             await ctx.send(embed=embed)
             return

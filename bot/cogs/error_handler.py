@@ -73,7 +73,7 @@ class ErrorHandler(Cog):
         log.debug(
             f"{ctx.author} tried to use an invalid command ({ctx.message.content})"
         )
-        await ctx.send(f'Command not found, use !help for help')
+        await ctx.send('Command not found, use !help for help')
 
     async def get_help_command(self, command: t.Optional[Command]) -> t.Tuple:
         """Return the help command invocation args to display help for `command`."""
@@ -106,7 +106,7 @@ class ErrorHandler(Cog):
             await ctx.send(f"Missing required argument `{e.param.name}`.")
             await ctx.invoke(*help_command)
         elif isinstance(e, errors.TooManyArguments):
-            await ctx.send(f"Too many arguments provided.")
+            await ctx.send("Too many arguments provided.")
             await ctx.invoke(*help_command)
         elif isinstance(e, (errors.BadArgument, errors.BadUnionArgument)):
             await ctx.send(f"Bad argument: {e}\n")
@@ -146,9 +146,7 @@ class ErrorHandler(Cog):
         )
 
         if isinstance(e, bot_missing_errors):
-            await ctx.send(
-                f"Sorry, it looks like I don't have the permissions or roles I need to do that."
-            )
+            await ctx.send("Sorry, it looks like I don't have the permissions or roles I need to do that.")
         elif isinstance(e, user_errors):
             await ctx.send(e)
 

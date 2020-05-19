@@ -84,7 +84,7 @@ class InfractionScheduler(Scheduler):
 
         # DM the user about infraction if it's not hidden infraction
         if not hidden:
-            dm_result = f':no_bell:'
+            dm_result = ':no_bell:'
             dm_log_text = "\nDM: **Failed**"
 
             # Sometimes user is a discord.Object; make it a proper user
@@ -97,7 +97,7 @@ class InfractionScheduler(Scheduler):
             else:
                 # Accordingly display wheather the user was successfully notified via DM
                 if await utils.notify_infraction(user, inf_type, duration, reason, icon):
-                    dm_result = f':bell:'
+                    dm_result = ':bell:'
                     dm_log_text = "\nDM: Sent"
 
         # Include total infractions count in STAFF_CHANNELS
@@ -156,7 +156,7 @@ class InfractionScheduler(Scheduler):
 
         if not infraction.is_active:
             if send_log:
-                await ctx.send(f":x: This infraction is not active")
+                await ctx.send(":x: This infraction is not active")
             return False
 
         log_text = await self.deactivate_infraction(infraction, send_log=False)
@@ -191,7 +191,7 @@ class InfractionScheduler(Scheduler):
             log.warning(
                 f"Failed to pardon {infraction.type} infraction #{id_} for {user}")
         else:
-            confirm_msg = f":ok_hand: pardoned"
+            confirm_msg = ":ok_hand: pardoned"
             log_title = "pardoned"
 
             log.info(
@@ -282,7 +282,7 @@ class InfractionScheduler(Scheduler):
             except discord.Forbidden:
                 log.warning(
                     f'Failed to deactivate infraction #{id_} ({type_})')
-                log_text["Failure"] = f"The bot lacks permissions to do this (role hierarchy?)"
+                log_text["Failure"] = "The bot lacks permissions to do this (role hierarchy?)"
                 log_content = staff_role.mention
             except discord.HTTPException as e:
                 log.exception(
@@ -315,7 +315,7 @@ class InfractionScheduler(Scheduler):
                 log_text["Note"] = log_note
 
         if send_log:
-            log_title = f"expiration failed" if "Failure" in log_text else "expired"
+            log_title = "expiration failed" if "Failure" in log_text else "expired"
 
             avatar = user.avatar_url_as(static_format="png") if user else None
 

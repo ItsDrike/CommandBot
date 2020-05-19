@@ -91,7 +91,7 @@ class Clean(Cog):
             embed = Embed(
                 color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
-                description=f'You can only use clean in the channel where you are'
+                description='You can only use clean in the channel where you are'
             )
             await ctx.send(embed=embed)
             return

@@ -82,7 +82,8 @@ class Infraction:
                         "{self.str_start}", {self.duration}, {int(self.is_active)}
                         );'''
         sql_find_command = f'''SELECT rowid FROM infractions WHERE(
-                        UID={self.user_id} and Type="{self.type}" and Reason="{self.reason}" and ActorID={self.actor_id} and Start="{self.str_start}" and Duration={self.duration} and Active={int(self.is_active)}
+                        UID={self.user_id} and Type="{self.type}" and Reason="{self.reason}" and ActorID={self.actor_id} and
+                        Start="{self.str_start}" and Duration={self.duration} and Active={int(self.is_active)}
                         );'''
         db = SQLite()
         db.execute(sql_write_command)
@@ -116,11 +117,11 @@ def get_infraction_by_row(row_id: int) -> Infraction:
 
 
 def get_all_active_infractions(inf_type: str = None) -> list:
-    log.debug(f'Getting all active infractions')
+    log.debug('Getting all active infractions')
 
     # Get all infractions from database
     db = SQLite()
-    db.execute(f'SELECT *, rowid FROM infractions WHERE Active=1;')
+    db.execute('SELECT *, rowid FROM infractions WHERE Active=1;')
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
