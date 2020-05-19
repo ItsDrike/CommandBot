@@ -1,21 +1,28 @@
-from bot.bot import Bot
+from collections import defaultdict
+
 from discord import Embed, TextChannel
 from discord.ext.commands import Cog, Context, command
-from collections import defaultdict
-from bot import constants
 
+from bot import constants
+from bot.bot import Bot
 
 prefix = constants.Bot.prefix
 
 
 class Chat(Cog):
+    """
+    A cog which allows user to send messages using the bot
+    """
+
     def __init__(self, bot: Bot):
         self.bot = bot
         self.embed_mode = defaultdict(bool)
         self.embed = {}
 
-    @command(alias=["embedbuild "])
-    async def embed(self, ctx: Context) -> None:
+    # region: embed mode
+
+    @command(alias=["embed", "embedcreate"])
+    async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
         if not self.embed_mode[ctx.author]:
             await ctx.send(f"{ctx.author.mention} You are now in embed creation mode, use `{prefix}embedhelp` for more info")
@@ -24,8 +31,9 @@ class Chat(Cog):
         else:
             await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}embedhelp` for more info")
 
-    @command(hidden=True)
+    @command()
     async def embedquit(self, ctx: Context) -> None:
+        """Leave embed creation mode"""
         if self.embed_mode[ctx.author]:
             await ctx.send(f"{ctx.author.mention} You are no longer in embed creation mode, any unsent embeds were cleared")
             self.embed_mode[ctx.author] = False
@@ -33,22 +41,22 @@ class Chat(Cog):
         else:
             await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
 
-    @command(hidden=True)
+    @command()
     async def embedshow(self, ctx: Context) -> None:
+        """Take a look at the embed"""
         try:
             await ctx.send(embed=self.embed[ctx.author])
         except KeyError:
             await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{prefix}embedhelp`)")
 
-    @command(hidden=True)
+    @command()
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
-        """Send the Embed"""
+        """Send the Embed to specified channel"""
         pass
 
-    @command(hidden=True)
-    async def embedhelp(self, ctx: Context) -> None:
-        """Show help page for embed creation"""
-        pass
+    # endregion
+    # region: embed build
+    # endregion
 
 
 def setup(bot: Bot) -> None:
