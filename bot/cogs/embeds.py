@@ -2,7 +2,7 @@ import textwrap
 from collections import defaultdict
 
 from discord import Colour, Embed, TextChannel
-from discord.ext.commands import Cog, Context, command, group
+from discord.ext.commands import Cog, Context, command, group, ColourConverter
 
 from bot import constants
 from bot.bot import Bot
@@ -144,6 +144,18 @@ class Embeds(Cog):
         self.embed[ctx.author] = embed
         await ctx.send("Embeds Image URL updated")
 
+    @embed_group.command(name="color", aliases=["colour"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_color(self, ctx: Context, *, color: ColourConverter) -> None:
+        """Set embeds title, `color` can be `rgb(x, y, z)` or `hsv(x, y, z)`"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.colour = color
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds color updated")
     # endregion
 
     async def get_embed(self, ctx):
