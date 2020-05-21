@@ -240,7 +240,7 @@ class Embeds(Cog):
         if embed is False:
             return
 
-        if self.embed_field_id[ctx.author] < ID:
+        if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
@@ -259,7 +259,7 @@ class Embeds(Cog):
         if embed is False:
             return
 
-        if self.embed_field_id[ctx.author] < ID:
+        if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
@@ -278,7 +278,7 @@ class Embeds(Cog):
         if embed is False:
             return
 
-        if self.embed_field_id[ctx.author] < ID:
+        if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
@@ -300,7 +300,7 @@ class Embeds(Cog):
         if embed is False:
             return
 
-        if self.embed_field_id[ctx.author] < ID:
+        if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
