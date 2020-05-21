@@ -2,14 +2,16 @@ import textwrap
 from collections import defaultdict
 
 from discord import Colour, Embed, TextChannel
-from discord.ext.commands import Cog, Context, command, group, ColourConverter
+from discord.ext.commands import Cog, ColourConverter, Context, command, group
 
-from bot import constants
 from bot.bot import Bot
 from bot.cogs.moderation.modlog import ModLog
+from bot.constants import MODERATION_ROLES
+from bot.constants import Bot as BotConstant
+from bot.constants import Icons
 from bot.decorators import with_role
 
-prefix = constants.Bot.prefix
+prefix = BotConstant.prefix
 
 
 class Embeds(Cog):
@@ -31,7 +33,7 @@ class Embeds(Cog):
     # region: embed mode
 
     @command(aliases=["embedcreate"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
         if not self.embed_mode[ctx.author]:
@@ -42,7 +44,7 @@ class Embeds(Cog):
             await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
 
     @command()
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embedquit(self, ctx: Context) -> None:
         """Leave embed creation mode"""
         if self.embed_mode[ctx.author]:
@@ -53,7 +55,7 @@ class Embeds(Cog):
             await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
 
     @command()
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embedshow(self, ctx: Context) -> None:
         """Take a look at the embed"""
         embed = await self.get_embed(ctx)
@@ -64,7 +66,7 @@ class Embeds(Cog):
         await ctx.send(embed=embed)
 
     @command()
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
         embed = await self.get_embed(ctx)
@@ -77,7 +79,7 @@ class Embeds(Cog):
             embed_msg = await channel.send(embed=embed)
 
             await self.mod_log.send_log_message(
-                icon_url=constants.Icons.message_edit,
+                icon_url=Icons.message_edit,
                 colour=Colour.blurple(),
                 title="Embed message sent",
                 thumbnail=ctx.author.avatar_url_as(static_format="png"),
@@ -94,13 +96,13 @@ class Embeds(Cog):
     # endregion
     # region: embed build
     @group(invoke_without_command=True, name='embed', aliases=["embedset"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_group(self, ctx: Context) -> None:
         """Commands for configuring the Embed message"""
         await ctx.invoke(self.bot.get_command('help'), 'embed')
 
     @embed_group.command(name="title")
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_title(self, ctx: Context, *, title: str) -> None:
         """Set embeds title"""
         embed = await self.get_embed(ctx)
@@ -113,7 +115,7 @@ class Embeds(Cog):
         await ctx.send("Embeds title updated")
 
     @embed_group.command(name="description")
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_description(self, ctx: Context, *, description: str) -> None:
         """Set embeds title"""
         embed = await self.get_embed(ctx)
@@ -126,7 +128,7 @@ class Embeds(Cog):
         await ctx.send("Embeds description updated")
 
     @embed_group.command(name="footer")
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_footer(self, ctx: Context, *, footer: str) -> None:
         """Set embeds footer"""
         embed = await self.get_embed(ctx)
@@ -139,7 +141,7 @@ class Embeds(Cog):
         await ctx.send("Embeds footer updated")
 
     @embed_group.command(name="image", aliases=["img"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_image(self, ctx: Context, *, url: str) -> None:
         """Set embeds image"""
         embed = await self.get_embed(ctx)
@@ -152,7 +154,7 @@ class Embeds(Cog):
         await ctx.send("Embeds Image URL updated")
 
     @embed_group.command(name="color", aliases=["colour"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_color(self, ctx: Context, *, color: ColourConverter) -> None:
         """Set embeds title, `color` can be HEX color or some of standard colors (red, blue, ...)"""
         embed = await self.get_embed(ctx)
@@ -166,7 +168,7 @@ class Embeds(Cog):
 
     # region: author
     @embed_group.command(name="author", aliases=["setauthor", "authorname"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_author_name(self, ctx: Context, *, author_name: str) -> None:
         """Set authors name in embed"""
         embed = await self.get_embed(ctx)
@@ -180,7 +182,7 @@ class Embeds(Cog):
         await ctx.send("Embeds author updated")
 
     @embed_group.command(name="authorurl", aliases=["setauthorurl"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_author_url(self, ctx: Context, *, author_url: str) -> None:
         """Set authors URL in embed"""
         embed = await self.get_embed(ctx)
@@ -196,7 +198,7 @@ class Embeds(Cog):
     @embed_group.command(name="authoricon", aliases=[
         "setauthoricon", "authoriconurl", "setauthoriconurl"
     ])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_author_icon(self, ctx: Context, *, icon_url: str) -> None:
         """Set authors image in embed"""
         embed = await self.get_embed(ctx)
@@ -215,7 +217,7 @@ class Embeds(Cog):
         "newfield", "makefield", "addfield",
         "fieldadd", "fieldcreate", "fieldmake", "field"
     ])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_field_create(self, ctx: Context, *, title: str = "None") -> None:
         """Create new field in embed"""
         embed = await self.get_embed(ctx)
@@ -230,7 +232,7 @@ class Embeds(Cog):
         await ctx.send(f"Embed field with ID **{self.embed_field_id[ctx.author]}** created")
 
     @embed_group.command(name="fielddescription", aliases=["fieldvalue"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_field_description(self, ctx: Context, ID: int, *, description: str) -> None:
         """Set description of embeds field"""
         embed = await self.get_embed(ctx)
@@ -249,7 +251,7 @@ class Embeds(Cog):
         await ctx.send(f"Embed field with ID: **{ID}** updated")
 
     @embed_group.command(name="fieldtitle", aliases=["fieldname"])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_field_value(self, ctx: Context, ID: int, *, title: str) -> None:
         """Set title of embeds field"""
         embed = await self.get_embed(ctx)
@@ -268,7 +270,7 @@ class Embeds(Cog):
         await ctx.send(f"Embed field with ID: **{ID}** updated")
 
     @embed_group.command(name="fieldinline")
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_field_inline(self, ctx: Context, ID: int, inline: bool) -> None:
         """Choose if embed should be inline or not"""
         embed = await self.get_embed(ctx)
@@ -290,7 +292,7 @@ class Embeds(Cog):
         "deletefield", "fieldremove", "fieldrem",
         "fielddel", "delfield", "remfield"
     ])
-    @with_role(*constants.MODERATION_ROLES)
+    @with_role(*MODERATION_ROLES)
     async def embed_field_remove(self, ctx: Context, ID: int) -> None:
         """Remove field in embed"""
         embed = await self.get_embed(ctx)
