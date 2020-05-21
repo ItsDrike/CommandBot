@@ -1,3 +1,4 @@
+import logging
 import textwrap
 from collections import defaultdict
 
@@ -12,6 +13,8 @@ from bot.constants import Icons
 from bot.decorators import with_role
 
 prefix = BotConstant.prefix
+
+log = logging.getLogger(__name__)
 
 
 class Embeds(Cog):
@@ -89,6 +92,7 @@ class Embeds(Cog):
                     Message jump link: {embed_msg.jump_url}
                 """),
             )
+            log.info(f"User {ctx.author} sent embed message to #{channel}")
             await ctx.send(":white_check_mark: Embed sent")
         else:
             await ctx.send(f":x: {ctx.author.mention} Sorry but you don't have permission to send messages to this channel")
