@@ -88,6 +88,8 @@ class Embeds(Cog):
                 """),
             )
             await ctx.send(":white_check_mark: Embed sent")
+        else:
+            await ctx.send(f":x: {ctx.author.mention} Sorry but you don't have permission to send messages to this channel")
 
     # endregion
     # region: embed build
