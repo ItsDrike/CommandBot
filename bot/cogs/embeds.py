@@ -158,6 +158,52 @@ class Embeds(Cog):
         self.embed[ctx.author] = embed
         await ctx.send("Embeds color updated")
 
+    # region: author
+    @embed_group.command(name="author", aliases=["setauthor", "authorname"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_author_name(self, ctx: Context, *, author_name: str) -> None:
+        """Set authors name in embed"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.set_author(name=author_name, url=embed.author.url,
+                         icon_url=embed.author.icon_url)
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds author updated")
+
+    @embed_group.command(name="authorurl", aliases=["setauthorurl"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_author_url(self, ctx: Context, *, author_url: str) -> None:
+        """Set authors URL in embed"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.set_author(name=embed.author.name, url=author_url,
+                         icon_url=embed.author.icon_url)
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds author URL updated")
+
+    @embed_group.command(name="authoricon", aliases=[
+        "setauthoricon", "authoriconurl", "setauthoriconurl"
+    ])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_author_icon(self, ctx: Context, *, icon_url: str) -> None:
+        """Set authors image in embed"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.set_author(name=embed.author.name, url=embed.author.url,
+                         icon_url=icon_url)
+        self.embed[ctx.author] = embed
+        await ctx.send("Embeds authors image updated")
+    # endregion
+
     # region: fields
     @embed_group.command(name="createfield", aliases=[
         "newfield", "makefield", "addfield",
