@@ -21,6 +21,7 @@ class Embeds(Cog):
         self.bot = bot
         self.embed_mode = defaultdict(bool)
         self.embed = {}
+        self.embed_field_id = defaultdict(lambda: -1)
 
     @property
     def mod_log(self) -> ModLog:
@@ -29,7 +30,7 @@ class Embeds(Cog):
 
     # region: embed mode
 
-    @command(alias=["embed", "embedcreate"])
+    @command(aliases=["embedcreate"])
     async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
         if not self.embed_mode[ctx.author]:
@@ -89,7 +90,7 @@ class Embeds(Cog):
     @group(invoke_without_command=True, name='embed', aliases=["embedset"])
     @with_role(*constants.MODERATION_ROLES)
     async def embed_group(self, ctx: Context) -> None:
-        '''Commands for configuring the Embed message'''
+        """Commands for configuring the Embed message"""
         await ctx.invoke(self.bot.get_command('help'), 'embed')
 
     @embed_group.command(name="title")
@@ -134,7 +135,7 @@ class Embeds(Cog):
     @embed_group.command(name="image", aliases=["img"])
     @with_role(*constants.MODERATION_ROLES)
     async def embed_image(self, ctx: Context, *, url: str) -> None:
-        """Set embeds image (not passing URL will remove the image)"""
+        """Set embeds image"""
         embed = await self.get_embed(ctx)
 
         if embed is False:
@@ -147,7 +148,7 @@ class Embeds(Cog):
     @embed_group.command(name="color", aliases=["colour"])
     @with_role(*constants.MODERATION_ROLES)
     async def embed_color(self, ctx: Context, *, color: ColourConverter) -> None:
-        """Set embeds title, `color` can be `rgb(x, y, z)` or `hsv(x, y, z)`"""
+        """Set embeds title, `color` can be HEX color or some of standard colors (red, blue, ...)"""
         embed = await self.get_embed(ctx)
 
         if embed is False:
@@ -156,9 +157,108 @@ class Embeds(Cog):
         embed.colour = color
         self.embed[ctx.author] = embed
         await ctx.send("Embeds color updated")
+
+    # region: fields
+    @embed_group.command(name="createfield", aliases=[
+        "newfield", "makefield", "addfield",
+        "fieldadd", "fieldcreate", "fieldmake"
+    ])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_field_create(self, ctx: Context, *, title: str = "None") -> None:
+        """Create new field in embed"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        embed.add_field(name=title, value="None")
+
+        self.embed_field_id[ctx.author] += 1
+        self.embed[ctx.author] = embed
+        await ctx.send(f"Embed field with ID **{self.embed_field_id[ctx.author]}** created")
+
+    @embed_group.command(name="fieldvalue", aliases=["fielddescription"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_field_description(self, ctx: Context, ID: int, *, description: str) -> None:
+        """Set description of embeds field"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        if self.embed_field_id[ctx.author] < ID:
+            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            return
+
+        embed.set_field_at(
+            ID, name=embed.fields[ID].name, value=description)
+
+        self.embed[ctx.author] = embed
+        await ctx.send(f"Embed field with ID: **{ID}** updated")
+
+    @embed_group.command(name="fieldtitle", aliases=["fieldname"])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_field_value(self, ctx: Context, ID: int, *, title: str) -> None:
+        """Set title of embeds field"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        if self.embed_field_id[ctx.author] < ID:
+            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            return
+
+        embed.set_field_at(
+            ID, name=title, value=embed.fields[ID].value)
+
+        self.embed[ctx.author] = embed
+        await ctx.send(f"Embed field with ID: **{ID}** updated")
+
+    @embed_group.command(name="fieldinline")
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_field_inline(self, ctx: Context, ID: int, inline: bool) -> None:
+        """Choose if embed should be inline or not"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        if self.embed_field_id[ctx.author] < ID:
+            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            return
+
+        embed.set_field_at(
+            ID, name=embed.fields[ID].name, value=embed.fields[ID].value, inline=inline)
+
+        self.embed[ctx.author] = embed
+        await ctx.send(f"Embed field with ID: **{ID}** updated")
+
+    @embed_group.command(name="removefield", aliases=[
+        "deletefield", "fieldremove", "fieldrem",
+        "fielddel", "delfield", "remfield"
+    ])
+    @with_role(*constants.MODERATION_ROLES)
+    async def embed_field_remove(self, ctx: Context, ID: int) -> None:
+        """Remove field in embed"""
+        embed = await self.get_embed(ctx)
+
+        if embed is False:
+            return
+
+        if self.embed_field_id[ctx.author] < ID:
+            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            return
+
+        embed.remove_field(ID)
+
+        self.embed[ctx.author] = embed
+        await ctx.send(f"Embed field with ID: **{ID}** removed (all other IDs were renumbered accordingly)")
+    # endregion
     # endregion
 
-    async def get_embed(self, ctx):
+    async def get_embed(self, ctx: Context) -> Embed:
+        """Return the authors embed or send error message and return `False`"""
         try:
             embed = self.embed[ctx.author]
         except KeyError:
