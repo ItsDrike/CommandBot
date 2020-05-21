@@ -207,7 +207,7 @@ class Embeds(Cog):
     # region: fields
     @embed_group.command(name="createfield", aliases=[
         "newfield", "makefield", "addfield",
-        "fieldadd", "fieldcreate", "fieldmake"
+        "fieldadd", "fieldcreate", "fieldmake", "field"
     ])
     @with_role(*constants.MODERATION_ROLES)
     async def embed_field_create(self, ctx: Context, *, title: str = "None") -> None:
@@ -223,7 +223,7 @@ class Embeds(Cog):
         self.embed[ctx.author] = embed
         await ctx.send(f"Embed field with ID **{self.embed_field_id[ctx.author]}** created")
 
-    @embed_group.command(name="fieldvalue", aliases=["fielddescription"])
+    @embed_group.command(name="fielddescription", aliases=["fieldvalue"])
     @with_role(*constants.MODERATION_ROLES)
     async def embed_field_description(self, ctx: Context, ID: int, *, description: str) -> None:
         """Set description of embeds field"""
@@ -299,6 +299,7 @@ class Embeds(Cog):
         embed.remove_field(ID)
 
         self.embed[ctx.author] = embed
+        self.embed_field_id[ctx.author] -= 1
         await ctx.send(f"Embed field with ID: **{ID}** removed (all other IDs were renumbered accordingly)")
     # endregion
     # endregion
