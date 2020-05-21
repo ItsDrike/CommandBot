@@ -252,7 +252,7 @@ class Embeds(Cog):
 
     @embed_group.command(name="fieldtitle", aliases=["fieldname"])
     @with_role(*MODERATION_ROLES)
-    async def embed_field_value(self, ctx: Context, ID: int, *, title: str) -> None:
+    async def embed_field_title(self, ctx: Context, ID: int, *, title: str) -> None:
         """Set title of embeds field"""
         embed = await self.get_embed(ctx)
 
