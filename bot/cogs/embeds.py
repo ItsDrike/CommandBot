@@ -31,6 +31,7 @@ class Embeds(Cog):
     # region: embed mode
 
     @command(aliases=["embedcreate"])
+    @with_role(*constants.MODERATION_ROLES)
     async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
         if not self.embed_mode[ctx.author]:
@@ -41,6 +42,7 @@ class Embeds(Cog):
             await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
 
     @command()
+    @with_role(*constants.MODERATION_ROLES)
     async def embedquit(self, ctx: Context) -> None:
         """Leave embed creation mode"""
         if self.embed_mode[ctx.author]:
@@ -51,6 +53,7 @@ class Embeds(Cog):
             await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
 
     @command()
+    @with_role(*constants.MODERATION_ROLES)
     async def embedshow(self, ctx: Context) -> None:
         """Take a look at the embed"""
         embed = await self.get_embed(ctx)
@@ -61,6 +64,7 @@ class Embeds(Cog):
         await ctx.send(embed=embed)
 
     @command()
+    @with_role(*constants.MODERATION_ROLES)
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
         embed = await self.get_embed(ctx)
