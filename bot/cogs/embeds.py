@@ -19,7 +19,7 @@ prefix = BotConstant.prefix
 log = logging.getLogger(__name__)
 
 
-# Global variable needed for the `check_embed` decorator to work
+# Global variable needed for the `has_active_embed` decorator to work
 embeds = {}
 
 
