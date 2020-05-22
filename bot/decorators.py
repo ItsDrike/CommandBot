@@ -11,7 +11,7 @@ from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import CheckFailure, Cog, Context
 
-from bot.constants import ERROR_REPLIES, RedirectOutput
+from bot.constants import ERROR_REPLIES, Bot, RedirectOutput
 from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)
@@ -226,3 +226,14 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
                 await func(self, ctx, *args, **kwargs)
         return inner
     return wrap
+
+
+def has_active_embed(embeds: dict) -> Callable:
+    """Make sure that the author has an active embed in the `embeds` dict"""
+    async def predicate(ctx) -> bool:
+        if ctx.author in embeds:
+            return True
+        else:
+            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{Bot.prefix}help Embeds`)")
+            return False
+    return commands.check(predicate)
