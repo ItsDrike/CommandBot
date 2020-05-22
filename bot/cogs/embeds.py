@@ -30,7 +30,6 @@ class Embeds(Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.embed_mode = defaultdict(bool)
         self.embed_field_id = defaultdict(lambda: -1)
 
     @property
