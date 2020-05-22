@@ -231,10 +231,9 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
 def has_active_embed(embeds: dict) -> Callable:
     """Make sure that the author has an active embed in the `embeds` dict"""
     async def predicate(ctx) -> bool:
-        try:
-            embeds[ctx.author]
-        except KeyError:
+        if ctx.author in embeds:
+            return True
+        else:
             await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{Bot.prefix}help Embeds`)")
             return False
-        return True
     return commands.check(predicate)
