@@ -1,5 +1,6 @@
 import logging
 import textwrap
+import typing as t
 from collections import defaultdict
 
 from discord import Colour, Embed, TextChannel
@@ -10,7 +11,8 @@ from bot.cogs.moderation.modlog import ModLog
 from bot.constants import MODERATION_ROLES
 from bot.constants import Bot as BotConstant
 from bot.constants import Icons
-from bot.decorators import with_role, has_active_embed
+from bot.decorators import has_active_embed, with_role
+from bot.utils.converters import FetchedMember
 
 prefix = BotConstant.prefix
 
@@ -175,15 +177,18 @@ class Embeds(Cog):
     ])
     @with_role(*MODERATION_ROLES)
     @has_active_embed(embeds)
-    async def embed_author_icon(self, ctx: Context, *, icon_url: str) -> None:
-
+    async def embed_author_icon(self, ctx: Context, *, icon_url: t.Union[FetchedMember, str]) -> None:
+        """Set authors icon in embed (You can also mention user to get his avatar)"""
         embed = embeds[ctx.author]
+        if type(icon_url) != str:
+            icon_url = icon_url.avatar_url_as(format="png")
         embed.set_author(
             name=embed.author.name,
             url=embed.author.url,
             icon_url=icon_url
         )
         await ctx.send("Embeds authors image updated")
+
     # endregion
 
     # region: fields
