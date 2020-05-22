@@ -44,9 +44,8 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
-        if not self.embed_mode[ctx.author]:
+        if ctx.author not in embeds:
             await ctx.send(f"{ctx.author.mention} You are now in embed creation mode, use `{prefix}help Embed` for more info")
-            self.embed_mode[ctx.author] = True
             embeds[ctx.author] = Embed()
         else:
             await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
@@ -55,9 +54,8 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embedquit(self, ctx: Context) -> None:
         """Leave embed creation mode"""
-        if self.embed_mode[ctx.author]:
+        if ctx.author in embeds:
             await ctx.send(f"{ctx.author.mention} You are no longer in embed creation mode, your embed was cleared")
-            self.embed_mode[ctx.author] = False
             del embeds[ctx.author]
         else:
             await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
@@ -74,11 +72,9 @@ class Embeds(Cog):
     @has_active_embed(embeds)
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
-        embed = embeds[ctx.author]
-
         channel_perms = channel.permissions_for(ctx.author)
         if channel_perms.send_messages:
-            embed_msg = await channel.send(embed=embed)
+            embed_msg = await channel.send(embed=embeds[ctx.author])
 
             await self.mod_log.send_log_message(
                 icon_url=Icons.message_edit,
@@ -156,7 +152,6 @@ class Embeds(Cog):
             url=embed.author.url,
             icon_url=embed.author.icon_url
         )
-        # TODO: Check if there is no need to update the embeds list
         await ctx.send("Embeds author updated")
 
     @embed_group.command(name="authorurl", aliases=["setauthorurl"])
@@ -200,8 +195,7 @@ class Embeds(Cog):
     @has_active_embed(embeds)
     async def embed_field_create(self, ctx: Context, *, title: str = "None") -> None:
         """Create new field in embed"""
-        embed = embeds[ctx.author]
-        embed.add_field(name=title, value="None")
+        embeds[ctx.author].add_field(name=title, value="None")
         self.embed_field_id[ctx.author] += 1
         await ctx.send(f"Embed field with ID **{self.embed_field_id[ctx.author]}** created")
 
@@ -269,8 +263,7 @@ class Embeds(Cog):
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
-        embed = embeds[ctx.author]
-        embed.remove_field(ID)
+        embeds[ctx.author].remove_field(ID)
         self.embed_field_id[ctx.author] -= 1
         await ctx.send(f"Embed field with ID: **{ID}** removed (all other IDs were renumbered accordingly)")
     # endregion
