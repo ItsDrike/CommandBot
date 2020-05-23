@@ -101,7 +101,7 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_group(self, ctx: Context) -> None:
         """Commands for configuring the Embed message"""
-        await ctx.invoke(self.bot.get_command('help'), 'embed')
+        await ctx.send_help(ctx.command)
 
     @embed_group.command(name="title")
     @with_role(*MODERATION_ROLES)
