@@ -19,10 +19,6 @@ prefix = BotConstant.prefix
 log = logging.getLogger(__name__)
 
 
-# Global variable needed for the `has_active_embed` decorator to work
-embeds = {}
-
-
 class Embeds(Cog):
     """
     A cog which allows user to send messages using the bot
@@ -30,6 +26,7 @@ class Embeds(Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.embeds = {}
         self.embed_field_id = defaultdict(lambda: -1)
 
     @property
@@ -43,9 +40,9 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embedbuild(self, ctx: Context) -> None:
         """Enter embed creation mode"""
-        if ctx.author not in embeds:
+        if ctx.author not in self.embeds:
             await ctx.send(f"{ctx.author.mention} You are now in embed creation mode, use `{prefix}help Embed` for more info")
-            embeds[ctx.author] = Embed()
+            self.embeds[ctx.author] = Embed()
         else:
             await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
 
@@ -53,9 +50,9 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embedquit(self, ctx: Context) -> None:
         """Leave embed creation mode"""
-        if ctx.author in embeds:
+        if ctx.author in self.embeds:
             await ctx.send(f"{ctx.author.mention} You are no longer in embed creation mode, your embed was cleared")
-            del embeds[ctx.author]
+            del self.embeds[ctx.author]
         else:
             await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
 
@@ -63,21 +60,21 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embedshow(self, ctx: Context) -> None:
         """Take a look at the embed"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        await ctx.send(embed=embeds[ctx.author])
+        await ctx.send(embed=self.embeds[ctx.author])
 
     @command()
     @with_role(*MODERATION_ROLES)
     async def embedsend(self, ctx: Context, channel: TextChannel) -> None:
         """Send the Embed to specified channel"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
         channel_perms = channel.permissions_for(ctx.author)
         if channel_perms.send_messages:
-            embed_msg = await channel.send(embed=embeds[ctx.author])
+            embed_msg = await channel.send(embed=self.embeds[ctx.author])
 
             await self.mod_log.send_log_message(
                 icon_url=Icons.message_edit,
@@ -107,50 +104,50 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_title(self, ctx: Context, *, title: str) -> None:
         """Set embeds title"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].title = title
+        self.embeds[ctx.author].title = title
         await ctx.send("Embeds title updated")
 
     @embed_group.command(name="description")
     @with_role(*MODERATION_ROLES)
     async def embed_description(self, ctx: Context, *, description: str) -> None:
         """Set embeds title"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].description = description
+        self.embeds[ctx.author].description = description
         await ctx.send("Embeds description updated")
 
     @embed_group.command(name="footer")
     @with_role(*MODERATION_ROLES)
     async def embed_footer(self, ctx: Context, *, footer: str) -> None:
         """Set embeds footer"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].set_footer(text=footer)
+        self.embeds[ctx.author].set_footer(text=footer)
         await ctx.send("Embeds footer updated")
 
     @embed_group.command(name="image", aliases=["img"])
     @with_role(*MODERATION_ROLES)
     async def embed_image(self, ctx: Context, *, url: str) -> None:
         """Set embeds image"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].set_image(url=url)
+        self.embeds[ctx.author].set_image(url=url)
         await ctx.send("Embeds Image URL updated")
 
     @embed_group.command(name="color", aliases=["colour"])
     @with_role(*MODERATION_ROLES)
     async def embed_color(self, ctx: Context, *, color: ColourConverter) -> None:
         """Set embeds title, `color` can be HEX color or some of standard colors (red, blue, ...)"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].colour = color
+        self.embeds[ctx.author].colour = color
         await ctx.send("Embeds color updated")
 
     # region: author
@@ -158,10 +155,10 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_author_name(self, ctx: Context, *, author_name: str) -> None:
         """Set authors name in embed"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         embed.set_author(
             name=author_name,
             url=embed.author.url,
@@ -173,10 +170,10 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_author_url(self, ctx: Context, *, author_url: str) -> None:
         """Set authors URL in embed"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         embed.set_author(
             name=embed.author.name,
             url=author_url,
@@ -190,10 +187,10 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_author_icon(self, ctx: Context, *, icon_url: t.Union[FetchedMember, str]) -> None:
         """Set authors icon in embed (You can also mention user to get his avatar)"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         if type(icon_url) != str:
             icon_url = icon_url.avatar_url_as(format="png")
         embed.set_author(
@@ -213,10 +210,10 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_field_create(self, ctx: Context, *, title: str = "None") -> None:
         """Create new field in embed"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
-        embeds[ctx.author].add_field(name=title, value="None")
+        self.embeds[ctx.author].add_field(name=title, value="None")
         self.embed_field_id[ctx.author] += 1
         await ctx.send(f"Embed field with ID **{self.embed_field_id[ctx.author]}** created")
 
@@ -224,13 +221,13 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_field_description(self, ctx: Context, ID: int, *, description: str) -> None:
         """Set description of embeds field"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
         if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         embed.set_field_at(
             ID,
             name=embed.fields[ID].name,
@@ -242,13 +239,13 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_field_title(self, ctx: Context, ID: int, *, title: str) -> None:
         """Set title of embeds field"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
         if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         embed.set_field_at(
             ID,
             name=title,
@@ -260,14 +257,14 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_field_inline(self, ctx: Context, ID: int, inline: bool) -> None:
         """Choose if embed should be inline or not"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
         if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
-        embed = embeds[ctx.author]
+        embed = self.embeds[ctx.author]
         embed.set_field_at(
             ID,
             name=embed.fields[ID].name,
@@ -283,22 +280,21 @@ class Embeds(Cog):
     @with_role(*MODERATION_ROLES)
     async def embed_field_remove(self, ctx: Context, ID: int) -> None:
         """Remove field in embed"""
-        if not await Embeds.has_active_embed(ctx):
+        if not await self.has_active_embed(ctx):
             return
 
         if self.embed_field_id[ctx.author] < ID or ID < 0:
             await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
-        embeds[ctx.author].remove_field(ID)
+        self.embeds[ctx.author].remove_field(ID)
         self.embed_field_id[ctx.author] -= 1
         await ctx.send(f"Embed field with ID: **{ID}** removed (all other IDs were renumbered accordingly)")
     # endregion
     # endregion
 
-    @staticmethod
-    async def has_active_embed(ctx):
-        if ctx.author in embeds:
+    async def has_active_embed(self, ctx):
+        if ctx.author in self.embeds:
             return True
         else:
             await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{Bot.prefix}help Embeds`)")
