@@ -1,6 +1,6 @@
 import logging
 import random
-from asyncio import Lock, sleep
+from asyncio import Lock, create_task, sleep
 from contextlib import suppress
 from functools import wraps
 from typing import Callable, Container, Union
@@ -11,7 +11,7 @@ from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import CheckFailure, Cog, Context
 
-from bot.constants import ERROR_REPLIES, Bot, RedirectOutput
+from bot.constants import ERROR_REPLIES, RedirectOutput
 from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)
@@ -155,7 +155,7 @@ def redirect_output(destination_channel: int, bypass_roles: Container[int] = Non
                 f"Redirecting output of {ctx.author}'s command '{ctx.command.name}' to {redirect_channel.name}")
             ctx.channel = redirect_channel
             await ctx.channel.send(f"Here's the output of your command, {ctx.author.mention}")
-            await func(self, ctx, *args, **kwargs)
+            create_task(func(self, ctx, *args, **kwargs))
 
             message = await old_channel.send(
                 f"Hey, {ctx.author.mention}, you can find the output of your command here: "
@@ -226,14 +226,3 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
                 await func(self, ctx, *args, **kwargs)
         return inner
     return wrap
-
-
-def has_active_embed(embeds: dict) -> Callable:
-    """Make sure that the author has an active embed in the `embeds` dict"""
-    async def predicate(ctx) -> bool:
-        if ctx.author in embeds:
-            return True
-        else:
-            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{Bot.prefix}help Embeds`)")
-            return False
-    return commands.check(predicate)
