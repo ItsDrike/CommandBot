@@ -17,6 +17,7 @@ fuzzywuzzy = "*"
 python-levenshtein = "*"
 sentry-sdk = "*"
 pre-commit = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"
