@@ -9,11 +9,11 @@ from discord.ext.commands import Context, Paginator
 
 from bot import constants
 
-FIRST_EMOJI = "\u25c0"   # [:arrow_backwards:]
-LEFT_EMOJI = "\u2b05"    # [:arrow_left:]
-RIGHT_EMOJI = "\u27a1"   # [:arrow_right:]
-LAST_EMOJI = "\u25b6"    # [:arrow_forward:]
-DELETE_EMOJI = constants.Emojis.delete  # [:trashcan:]
+FIRST_EMOJI = "\u23EE"   # [:track_previous:]
+LEFT_EMOJI = "\u2B05"    # [:arrow_left:]
+RIGHT_EMOJI = "\u27A1"   # [:arrow_right:]
+LAST_EMOJI = "\u23ED"    # [:track_next:]
+DELETE_EMOJI = constants.Emojis.delete  # [:x:]
 
 PAGINATION_EMOJI = (FIRST_EMOJI, LEFT_EMOJI, RIGHT_EMOJI,
                     LAST_EMOJI, DELETE_EMOJI)
@@ -104,7 +104,7 @@ class LinePaginator(Paginator):
         timeout: int = 300,
         footer_text: str = None,
         url: str = None,
-        exception_on_empty_embed: bool = False
+        exception_on_empty_embed: bool = False,
     ) -> t.Optional[discord.Message]:
         """
         Use a paginator and set of reactions to provide pagination over a set of lines.
