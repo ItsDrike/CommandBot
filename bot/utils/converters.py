@@ -75,7 +75,7 @@ class Duration(Converter):
         r"((?P<weeks>\d+?) ?(weeks|week|W|w) ?)?"
         r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
         r"((?P<hours>\d+?) ?(hours|hour|hrs|H|h) ?)?"
-        r"((?P<minutes>\d+?) ?(minutes|minute|min|m) ?)?"
+        r"((?P<minutes>\d+?) ?(minutes|minute|min|M|m) ?)?"
         r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
     )
 
