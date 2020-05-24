@@ -164,8 +164,7 @@ class FetchedUser(UserConverter):
     2. Lookup by mention.
     3. Lookup by name#discrim
     4. Lookup by name
-    5. Lookup via API
-    6. Create a proxy user with discord.Object
+    5. Create a proxy user with discord.Object
     """
     async def convert(self, ctx: Context, arg: str) -> t.Union[discord.User, discord.Object]:
         """Convert the `arg` to a `discord.User` or `discord.Object`."""
