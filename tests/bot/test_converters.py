@@ -2,11 +2,14 @@ import asyncio
 import unittest
 from unittest.mock import MagicMock
 
+import datetime
+
 from discord.ext.commands import BadArgument
 
 from bot.utils.converters import (
     DiceThrow,
     Duration,
+    ISODelta,
 )
 
 
@@ -161,3 +164,96 @@ class ConverterTests(unittest.TestCase):
                 with self.assertRaises(BadArgument, msg=exception_message):
                     asyncio.run(converter.convert(
                         self.context, invalid_duration))
+
+    def test_isodelta_converter_for_valid(self):
+        """
+        ISODelta converter returns correct datetime for valid datetime string. (`get_datetime`)
+
+        While verification of `get_datetime` is easy, verifying `convert` is harder since
+        it uses `datetime.datetime.now()` to get timedelta which is different from when this
+        check will get current time. There is a workaround to test that the difference is less
+        than 0.01 seconds.
+        """
+        test_values = (
+            # `YYYY-mm-ddTHH:MM:SSZ` | `YYYY-mm-dd HH:MM:SSZ`
+            ('2019-09-02T02:03:05Z', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 02:03:05Z', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+
+            # `YYYY-mm-ddTHH:MM:SS±HH:MM` | `YYYY-mm-dd HH:MM:SS±HH:MM`
+            ('2019-09-02T03:18:05+01:15', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 03:18:05+01:15', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02T00:48:05-01:15', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 00:48:05-01:15', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+
+            # `YYYY-mm-ddTHH:MM:SS±HHMM` | `YYYY-mm-dd HH:MM:SS±HHMM`
+            ('2019-09-02T03:18:05+0115', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 03:18:05+0115', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02T00:48:05-0115', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 00:48:05-0115', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+
+            # `YYYY-mm-ddTHH:MM:SS±HH` | `YYYY-mm-dd HH:MM:SS±HH`
+            ('2019-09-02 03:03:05+01', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02T01:03:05-01', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+
+            # `YYYY-mm-ddTHH:MM:SS` | `YYYY-mm-dd HH:MM:SS`
+            ('2019-09-02T02:03:05', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+            ('2019-09-02 02:03:05', datetime.datetime(2019, 9, 2, 2, 3, 5)),
+
+            # `YYYY-mm-ddTHH:MM` | `YYYY-mm-dd HH:MM`
+            ('2019-11-12T09:15', datetime.datetime(2019, 11, 12, 9, 15)),
+            ('2019-11-12 09:15', datetime.datetime(2019, 11, 12, 9, 15)),
+
+            # `YYYY-mm-dd`
+            ('2019-04-01', datetime.datetime(2019, 4, 1)),
+
+            # `YYYY-mm`
+            ('2019-02-01', datetime.datetime(2019, 2, 1)),
+
+            # `YYYY`
+            ('2025', datetime.datetime(2025, 1, 1)),
+        )
+
+        converter = ISODelta()
+
+        for datetime_string, corresponding_dt in test_values:
+            with self.subTest(datetime_string=datetime_string, corresponding_dt=corresponding_dt):
+                converted_dt = asyncio.run(
+                    converter.get_datetime(datetime_string))
+
+                self.assertEqual(converted_dt, corresponding_dt)
+
+                converted_delta = asyncio.run(
+                    converter.convert(self.context, datetime_string))
+
+                now = datetime.datetime.now()
+                expected_delta = (corresponding_dt - now).total_seconds()
+
+                self.assertLessEqual(
+                    abs(converted_delta - expected_delta), 0.01)
+
+    def test_isodelta_converter_for_invalid(self):
+        """ISODelta converter raises the correct exception for invalid datetime strings."""
+        test_values = (
+            # Make sure it doesn't interfere with the Duration converter
+            ('1Y'),
+            ('1d'),
+            ('1H'),
+
+            # Check if it fails when only providing the optional time part
+            ('10:10:10'),
+            ('10:00'),
+
+            # Invalid date format
+            ('19-01-01'),
+
+            # Other non-valid strings
+            ('Fish the omnipotent'),
+        )
+
+        converter = ISODelta()
+        for datetime_string in test_values:
+            with self.subTest(datetime_string=datetime_string):
+                exception_message = f"`{datetime_string}` is not a valid ISO-8601 datetime string"
+                with self.assertRaises(BadArgument, msg=exception_message):
+                    asyncio.run(converter.convert(
+                        self.context, datetime_string))
