@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import warnings
 
 import discord
 from discord.ext import commands
@@ -11,19 +10,11 @@ log = logging.getLogger('bot')
 
 
 class Bot(commands.Bot):
-    """A subclass of `discord.ext.commands.Bot` with an aiohttp session and an API client."""
+    """A subclass of `discord.ext.commands.Bot` with some added functionality"""
 
     def __init__(self, *args, **kwargs):
-        if "connector" in kwargs:
-            warnings.warn(
-                "If login() is called (or the bot is started), the connector will be overwritten "
-                "with an internal one"
-            )
-
         super().__init__(*args, **kwargs)
 
-        self._connector = None
-        self._resolver = None
         self._guild_available = asyncio.Event()
 
     def add_cog(self, cog: commands.Cog) -> None:
