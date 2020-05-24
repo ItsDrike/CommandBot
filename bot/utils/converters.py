@@ -40,7 +40,7 @@ def proxy_user(user_id: str) -> discord.Object:
 class DiceThrow(Converter):
     """Convert dice throw strings into tuple[int, int]"""
     dice_parser = re.compile(
-        r"(^(?P<throws>[1-9]+\d*?)[dD](?P<sides>[1-9]\d*?)$)"
+        r"(^(?P<throws>(?:[1-9]\d*)??)[dD](?P<sides>[1-9]\d*?)$)"
     )
 
     @classmethod
@@ -59,7 +59,7 @@ class DiceThrow(Converter):
                 f"`{dice_string}` is not a valid dice throw string.")
 
         dice_dict = {
-            param: int(amount)
+            param: (int(amount) if amount != '' else 1)
             for param, amount in match.groupdict(default=1).items()
         }
 
