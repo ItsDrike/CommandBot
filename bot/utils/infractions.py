@@ -77,17 +77,20 @@ class Infraction:
         log.debug(
             f'Adding infraction {self.type} to {self.user_id} by {self.actor_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]')
 
-        sql_write_command = f'''INSERT INTO infractions VALUES(
-                        {self.user_id}, "{self.type}", "{self.reason}", "{self.actor_id}",
-                        "{self.str_start}", {self.duration}, {int(self.is_active)}
-                        );'''
-        sql_find_command = f'''SELECT rowid FROM infractions WHERE(
-                        UID={self.user_id} and Type="{self.type}" and Reason="{self.reason}" and ActorID={self.actor_id} and
-                        Start="{self.str_start}" and Duration={self.duration} and Active={int(self.is_active)}
-                        );'''
+        # In order to prevent SQL Injections use `?` as placeholder and let SQLite handle the input
+        sql_write_command = '''INSERT INTO infractions VALUES(?, ?, ?, ?, ?, ?, ?);'''
+        sql_write_args = (self.user_id, self.type, self.reason, self.actor_id,
+                          self.str_start, self.duration, int(self.is_active))
+
+        sql_find_command = '''SELECT rowid FROM infractions WHERE(
+                        UID=? and Type=? and Reason=? and ActorID=? and Start=? and Duration=? and Active=?
+        );'''
+        sql_find_args = (self.user_id, self.type, self.reason, self.actor_id,
+                         self.str_start, self.duration, int(self.is_active))
+
         db = SQLite()
-        db.execute(sql_write_command)
-        db.execute(sql_find_command)
+        db.execute(sql_write_command, sql_write_args)
+        db.execute(sql_find_command, sql_find_args)
         self.id = db.cur.fetchone()[0]
         db.close()
 
@@ -96,16 +99,17 @@ class Infraction:
         log.debug(
             f'Deactivating infraction #{self.id}: {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]')
 
-        sql_command = f'''UPDATE infractions SET Active=0 WHERE rowid={self.id};'''
+        sql_command = '''UPDATE infractions SET Active=0 WHERE rowid=?;'''
+        sql_args = (self.id, )
 
         db = SQLite()
-        db.execute(sql_command)
+        db.execute(sql_command, sql_args)
         db.close()
 
 
 def get_infraction_by_row(row_id: int) -> Infraction:
     db = SQLite()
-    db.execute(f'SELECT *, rowid FROM infractions WHERE rowid={row_id}')
+    db.execute('SELECT *, rowid FROM infractions WHERE rowid=?', (row_id, ))
     try:
         infraction = Infraction(*db.cur.fetchone())
         log.debug(f'Getting infraction #{row_id}')
@@ -139,7 +143,7 @@ def get_infractions(user: UserSnowflake, inf_type: str = None) -> list:
 
     # Get all infractions from database
     db = SQLite()
-    db.execute(f'SELECT *, rowid FROM infractions WHERE UID={user.id}')
+    db.execute('SELECT *, rowid FROM infractions WHERE UID=?', (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -158,7 +162,7 @@ def get_active_infractions(user: UserSnowflake, inf_type: str = None) -> list:
     # Get all infractions from database
     db = SQLite()
     db.execute(
-        f'SELECT *, rowid FROM infractions WHERE UID={user.id} AND Active=1')
+        'SELECT *, rowid FROM infractions WHERE UID=? AND Active=1', (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -177,7 +181,7 @@ def get_inactive_infractions(user: UserSnowflake, inf_type: str = None) -> list:
     # Get all infractions from database
     db = SQLite()
     db.execute(
-        f'SELECT *, rowid FROM infractions WHERE UID={user.id} AND Active=0')
+        'SELECT *, rowid FROM infractions WHERE UID=? AND Active=0', (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -193,5 +197,5 @@ def get_inactive_infractions(user: UserSnowflake, inf_type: str = None) -> list:
 def remove_infraction(infraction: Infraction) -> None:
     row_id = infraction.id
     db = SQLite()
-    db.execute(f'DELETE FROM infractions WHERE rowid={row_id}')
+    db.execute('DELETE FROM infractions WHERE rowid=?', (row_id, ))
     db.close()
