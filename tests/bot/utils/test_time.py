@@ -1,4 +1,7 @@
+import asyncio
 import unittest
+from datetime import datetime
+from unittest.mock import AsyncMock, patch
 
 from dateutil.relativedelta import relativedelta
 
@@ -46,3 +49,14 @@ class TimeTests(unittest.TestCase):
                     days=2, hours=2), 'hours', max_units)
             self.assertEqual(str(error.exception),
                              'max_units must be positive')
+
+    @patch('asyncio.sleep', new_callable=AsyncMock)
+    def test_wait_until(self, mock):
+        """Testing wait_until."""
+        start = datetime(2019, 1, 1, 0, 0)
+        then = datetime(2019, 1, 1, 0, 10)
+
+        # No return value
+        self.assertIs(asyncio.run(time.wait_until(then, start)), None)
+
+        mock.assert_called_once_with(10 * 60)
