@@ -14,7 +14,7 @@ class InChannelTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up helpers so that only need to be defined once"""
+        """Set up helpers so that they only need to be defined once"""
         cls.commands_channel = helpers.MockTextChannel(id=123456789)
         cls.non_whitelisted_channel = helpers.MockTextChannel(id=666666)
         cls.hidden_channel = helpers.MockTextChannel(id=88888888)
