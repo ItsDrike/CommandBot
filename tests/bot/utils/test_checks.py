@@ -24,3 +24,20 @@ class ChecksTests(unittest.TestCase):
         """`with_role_check` returns `True` if `Context.author` has the required role."""
         self.ctx.author.roles.append(MockRole(id=10))
         self.assertTrue(checks.with_role_check(self.ctx, 10))
+
+    def test_without_role_check_without_guild(self):
+        """`without_role_check` should return `False` when `Context.guild` is None."""
+        self.ctx.guild = None
+        self.assertFalse(checks.without_role_check(self.ctx))
+
+    def test_without_role_check_returns_false_with_unwanted_role(self):
+        """`without_role_check` returns `False` if `Context.author` has unwanted role."""
+        role_id = 42
+        self.ctx.author.roles.append(MockRole(id=role_id))
+        self.assertFalse(checks.without_role_check(self.ctx, role_id))
+
+    def test_without_role_check_returns_true_without_unwanted_role(self):
+        """`without_role_check` returns `True` if `Context.author` does not have unwanted role."""
+        role_id = 42
+        self.ctx.author.roles.append(MockRole(id=role_id))
+        self.assertTrue(checks.without_role_check(self.ctx, role_id + 10))
