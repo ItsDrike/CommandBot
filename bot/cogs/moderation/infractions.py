@@ -15,7 +15,7 @@ from bot.constants import Event
 from bot.decorators import respect_role_hierarchy, with_role
 from bot.utils import infractions
 from bot.utils.checks import has_higher_role_check
-from bot.utils.converters import Expiry, FetchedMember
+from bot.converters import Expiry, FetchedMember
 
 from . import utils
 from .modlog import ModLog

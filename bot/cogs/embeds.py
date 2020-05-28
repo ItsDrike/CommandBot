@@ -12,7 +12,7 @@ from bot.constants import MODERATION_ROLES
 from bot.constants import Bot as BotConstant
 from bot.constants import Icons
 from bot.decorators import with_role
-from bot.utils.converters import FetchedMember
+from bot.converters import FetchedMember
 
 prefix = BotConstant.prefix
 

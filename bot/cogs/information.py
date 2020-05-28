@@ -16,7 +16,7 @@ from bot.bot import Bot
 from bot.decorators import with_role, in_whitelist
 from bot.pagination import LinePaginator
 from bot.utils.checks import has_higher_role_check, with_role_check
-from bot.utils.converters import FetchedMember
+from bot.converters import FetchedMember
 from bot.utils.time import time_since
 
 log = logging.getLogger(__name__)
