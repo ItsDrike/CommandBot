@@ -7,7 +7,7 @@ from bot.bot import Bot
 from bot.constants import STAFF_ROLES
 from bot.constants import Bot as BotConstant
 from bot.constants import Channels, Roles
-from bot.decorators import in_channel
+from bot.decorators import in_whitelist
 from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class Announcements(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @in_channel(Channels.commands, bypass_roles=STAFF_ROLES)
+    @in_whitelist(redirect=Channels.commands, roles=STAFF_ROLES)
     @command()
     async def subscribe(self, ctx: Context) -> None:
         """Get notified on new announcements"""
@@ -31,7 +31,7 @@ class Announcements(commands.Cog):
         else:
             await ctx.send(f'You are already subscribed (use {BotConstant.prefix}unsubscribe to unsubscribe)')
 
-    @in_channel(Channels.commands, bypass_roles=STAFF_ROLES)
+    @in_whitelist(redirect=Channels.commands, roles=STAFF_ROLES)
     @command()
     async def unsubscribe(self, ctx: Context) -> None:
         """Stop receiving new announcements"""
