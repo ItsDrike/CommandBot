@@ -6,7 +6,7 @@ import datetime
 
 from discord.ext.commands import BadArgument
 
-from bot.utils.converters import (
+from bot.converters import (
     DiceThrow,
     Duration,
     ISODelta,
