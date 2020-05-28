@@ -18,3 +18,6 @@ users.db
 
 # Ignore custom user-config file
 config.yaml
+
+# Coverage.py execution data
+.coverage

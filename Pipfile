@@ -17,6 +17,11 @@ fuzzywuzzy = "*"
 python-levenshtein = "*"
 sentry-sdk = "*"
 pre-commit = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+test = "coverage run -m unittest"
+report = "coverage report"

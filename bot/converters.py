@@ -40,7 +40,7 @@ def proxy_user(user_id: str) -> discord.Object:
 class DiceThrow(Converter):
     """Convert dice throw strings into tuple[int, int]"""
     dice_parser = re.compile(
-        r"(^(?P<throws>[1-9]+\d*?)[dD](?P<sides>[1-9]\d*?)$)"
+        r"^(?P<throws>(?:0*[1-9]\d*)??)[dD](?P<sides>0*[1-9]\d*?)$"
     )
 
     @classmethod
@@ -59,7 +59,7 @@ class DiceThrow(Converter):
                 f"`{dice_string}` is not a valid dice throw string.")
 
         dice_dict = {
-            param: int(amount)
+            param: (int(amount) if amount != '' else 1)
             for param, amount in match.groupdict(default=1).items()
         }
 
@@ -75,7 +75,7 @@ class Duration(Converter):
         r"((?P<weeks>\d+?) ?(weeks|week|W|w) ?)?"
         r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
         r"((?P<hours>\d+?) ?(hours|hour|hrs|H|h) ?)?"
-        r"((?P<minutes>\d+?) ?(minutes|minute|min|m) ?)?"
+        r"((?P<minutes>\d+?) ?(minutes|minute|min|M|m) ?)?"
         r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
     )
 
@@ -110,8 +110,28 @@ class Duration(Converter):
         return seconds
 
 
-class ISODateTime(Converter):
+class ISODelta(Converter):
     """Converts an ISO-8601 datetime string into a datetime.datetime."""
+
+    async def get_datetime(self, datetime_string: str) -> datetime:
+        """
+        First convert to datetime
+
+        This is useful for testing purposes, as `datetime.datetime.now()` may be different
+        at the time of testing compared to time of computing the delta
+        """
+
+        try:
+            dt = dateutil.parser.isoparse(datetime_string)
+        except ValueError:
+            raise BadArgument(
+                f"`{datetime_string}` is not a valid ISO-8601 datetime string")
+
+        if dt.tzinfo:
+            dt = dt.astimezone(dateutil.tz.UTC)
+            dt = dt.replace(tzinfo=None)
+
+        return dt
 
     async def convert(self, ctx: Context, datetime_string: str) -> int:
         """
@@ -140,11 +160,8 @@ class ISODateTime(Converter):
         Note: ISO-8601 specifies a `T` as the separator between the date and the time part of the
         datetime string. The converter accepts both a `T` and a single space character.
         """
-        try:
-            dt = dateutil.parser.isoparse(datetime_string)
-        except ValueError:
-            raise BadArgument(
-                f"`{datetime_string}` is not a valid ISO-8601 datetime string")
+
+        dt = await self.get_datetime(datetime_string)
 
         now = datetime.datetime.now()
 
@@ -193,4 +210,4 @@ class FetchedUser(UserConverter):
 
 
 FetchedMember = t.Union[discord.Member, FetchedUser]
-Expiry = t.Union[Duration, ISODateTime]
+Expiry = t.Union[Duration, ISODelta]
