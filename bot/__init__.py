@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import os
 import sys
 from logging import handlers
 from pathlib import Path
@@ -46,3 +48,7 @@ logging.getLogger('bot.utils.scheduling').setLevel(logging.INFO)
 logging.getLogger('bot.decorators').setLevel(logging.INFO)
 
 logging.getLogger(__name__)
+
+# On Windows, the selector event loop is required for aiodns.
+if os.name == "nt":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
