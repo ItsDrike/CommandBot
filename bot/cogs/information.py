@@ -13,7 +13,7 @@ from discord.utils import escape_markdown
 import bot.utils.infractions as infractions
 from bot import constants
 from bot.bot import Bot
-from bot.decorators import InChannelCheckFailure, with_role
+from bot.decorators import with_role, in_whitelist
 from bot.pagination import LinePaginator
 from bot.utils.checks import has_higher_role_check, with_role_check
 from bot.utils.converters import FetchedMember
@@ -145,6 +145,7 @@ class Information(Cog):
 
         await ctx.send(embed=embed)
 
+    @in_whitelist(redirect=constants.Channels.commands, roles=constants.STAFF_ROLES)
     @command(name="user", aliases=["user_info", "member", "member_info"])
     async def user_info(self, ctx: Context, user: FetchedMember = None) -> None:
         """Returns info about a user."""
@@ -156,15 +157,11 @@ class Information(Cog):
             await ctx.send("You may not use this command on users other than yourself.")
             return
 
-        # Non-staff may only do this in #bot-commands
-        if not with_role_check(ctx, *constants.STAFF_ROLES):
-            if not ctx.channel.id == constants.Channels.commands:
-                raise InChannelCheckFailure(constants.Channels.commands)
-
         embed = await self.create_user_embed(ctx, user)
 
         await ctx.send(embed=embed)
 
+    @in_whitelist(redirect=constants.Channels.commands, roles=constants.STAFF_ROLES)
     @command(name="infractions", aliases=["show_infractions"])
     async def infractions(self, ctx: Context, user: FetchedMember = None) -> None:
         '''Return user's infractions'''
@@ -188,11 +185,6 @@ class Information(Cog):
             )
             await ctx.send(embed=embed)
             return
-
-        # Non-staff may only do this in #bot-commands
-        if not with_role_check(ctx, *constants.STAFF_ROLES):
-            if not ctx.channel.id == constants.Channels.commands:
-                raise InChannelCheckFailure(constants.Channels.commands)
 
         embed = await self.create_infractions_embed(ctx, user)
 

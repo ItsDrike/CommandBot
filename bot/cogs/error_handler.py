@@ -5,7 +5,7 @@ from discord.ext.commands import Cog, Command, Context, errors
 from sentry_sdk import push_scope
 
 from bot.bot import Bot
-from bot.decorators import InChannelCheckFailure, PermissionCheckFailure
+from bot.decorators import InWhitelistCheckFailure, PermissionCheckFailure
 
 log = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ class ErrorHandler(Cog):
         * BotMissingRole
         * BotMissingAnyRole
         * NoPrivateMessage
-        * InChannelCheckFailure
+        * InWhitelistCheckFailure
         * PermissionCheckFailure
         """
         bot_missing_errors = (
@@ -140,7 +140,7 @@ class ErrorHandler(Cog):
         )
 
         user_errors = (
-            InChannelCheckFailure,
+            InWhitelistCheckFailure,
             PermissionCheckFailure,
             errors.NoPrivateMessage
         )
