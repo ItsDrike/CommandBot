@@ -6,7 +6,7 @@ from discord.ext.commands import Cog, Context, command
 
 from bot import constants
 from bot.bot import Bot
-from bot.utils.converters import DiceThrow
+from bot.converters import DiceThrow
 
 
 class Fun(Cog):
