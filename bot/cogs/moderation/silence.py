@@ -91,21 +91,8 @@ class Silence(commands.Cog):
         if not await self._silence(ctx.channel, duration=duration):
             await ctx.send(f"{Emojis.cross_mark} current channel is already silenced.")
             return
-        if duration is None:
-            await ctx.send(f"{Emojis.check_mark} silenced current channel indefinitely.")
-            return
 
-        await ctx.send(f"{Emojis.check_mark} silenced current channel for {duration} minute(s).")
-
-        channel = SilencedChannel(
-            id=ctx.channel.id,
-            ctx=ctx,
-            silence=self,
-            stop=datetime.datetime.now() + datetime.timedelta(minutes=duration),
-        )
-
-        await self.scheduler.schedule_unsilence(channel)
-
+        # Log this to #mod_log channel
         response = (
             f"**Channel:** {ctx.channel.mention} (`{ctx.channel.id}`)\n"
             f"**Actor:** {ctx.author.mention} (`{ctx.author.mention}`)\n"
@@ -118,27 +105,44 @@ class Silence(commands.Cog):
             channel_id=Channels.mod_log
         )
 
+        if duration is None:
+            await ctx.send(f"{Emojis.check_mark} silenced current channel indefinitely.")
+            return
+        await ctx.send(f"{Emojis.check_mark} silenced current channel for {duration} minute(s).")
+
+        channel = SilencedChannel(
+            id=ctx.channel.id,
+            ctx=ctx,
+            silence=self,
+            stop=datetime.datetime.now() + datetime.timedelta(minutes=duration),
+        )
+
+        await self.scheduler.schedule_unsilence(channel)
+
     @commands.command(aliases=("unhush", "unmutechat"))
     async def unsilence(self, ctx: Context) -> None:
         """Unsiilence the current channel."""
         await self._get_instance_vars_event.wait()
         log.debug(
             f"Unsilencing channel #{ctx.channel} from {ctx.author}'s command.")
-        if await self._unsilence(ctx.channel):
-            await ctx.send(f"{Emojis.check_mark} unsilenced current channel.")
 
-            response = (
-                f"**Channel:** {ctx.channel.mention} (`{ctx.channel.id}`)\n"
-                f"**Actor:** {ctx.author.mention} (`{ctx.author.mention}`)\n"
-            )
-            await self.mod_log.send_log_message(
-                Icons.message_edit, Colours.soft_green,
-                "Channel unsilenced",
-                response,
-                channel_id=Channels.mod_log
-            )
-        else:
+        if not await self._unsilence(ctx.channel):
             await ctx.send(f"{Emojis.cross_mark} current channel is not silenced")
+            return
+
+        await ctx.send(f"{Emojis.check_mark} unsilenced current channel.")
+
+        # Log this to #mod_log channel
+        response = (
+            f"**Channel:** {ctx.channel.mention} (`{ctx.channel.id}`)\n"
+            f"**Actor:** {ctx.author.mention} (`{ctx.author.mention}`)\n"
+        )
+        await self.mod_log.send_log_message(
+            Icons.message_edit, Colours.soft_green,
+            "Channel unsilenced",
+            response,
+            channel_id=Channels.mod_log
+        )
 
     async def _silence(self, channel: TextChannel, duration: Optional[int]) -> bool:
         """Silence `channel` for `self._guests_role`"""
@@ -147,8 +151,10 @@ class Silence(commands.Cog):
             log.info(
                 f"Tried to silence channel #{channel} ({channel.id}) but the channel was already silenced.")
             return False
+
         await channel.set_permissions(self._guests_role, **dict(current_overwrite, send_messages=False))
         self.muted_channels.add(channel)
+
         if not duration:
             log.info(f"Silenced #{channel} ({channel.id}) indefinitely.")
             return True
