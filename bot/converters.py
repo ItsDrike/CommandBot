@@ -9,6 +9,9 @@ import discord
 from dateutil.relativedelta import relativedelta
 from discord.ext.commands import BadArgument, Context, Converter, UserConverter
 
+from bot.utils.checks import with_role_check
+from bot.constants import MODERATION_ROLES
+
 log = logging.getLogger(__name__)
 
 
@@ -64,6 +67,41 @@ class DiceThrow(Converter):
         }
 
         return (dice_dict['throws'], dice_dict['sides'])
+
+
+class SilenceDurationConverter(Converter):
+    """Convert passed duration to `int` minutes or `None`."""
+
+    MINUTES_RE = re.compile(r"(\d+)(?:M|m|$)")
+
+    async def convert(self, ctx: Context, argument: str) -> t.Optional[int]:
+        """
+        Convert `argument` to a duration
+
+        If duration is longer than 15 minutes, only allow it for users with moderator roles
+        Accepted formats are:
+        * <duration>,
+        * <duration>m,
+        * <duration>M,
+        * forever,
+        """
+        if argument == "forever":
+            duration = None
+        else:
+            match = self.MINUTES_RE.match(argument)
+
+            if not match:
+                raise BadArgument(
+                    f"{argument} is not a valid minutes duration.")
+
+            duration = int(match.group(1))
+
+        if duration is None or duration > 15:
+            if with_role_check(ctx, *MODERATION_ROLES):
+                return duration
+            raise BadArgument(
+                "You can't silence the channel for more than 15 minutes.")
+        return duration
 
 
 class Duration(Converter):
