@@ -85,6 +85,12 @@ class Silence(commands.Cog):
 
         Duration is capped at 15 minutes for non-moderators.
         """
+        if not ctx.channel.permissions_for(ctx.author).manage_messages:
+            await ctx.send(
+                f"{Emojis.cross_mark} sorry, you can't manage messages here")
+            log.debug(
+                f"{ctx.author} tried to silence #{ctx.channel} without manage messages permission")
+            return
         await self._get_instance_vars_event.wait()
         log.debug(f"{ctx.author} is silencing channel #{ctx.channel}")
 
@@ -122,6 +128,13 @@ class Silence(commands.Cog):
     @commands.command(aliases=("unhush", "unmutechat"))
     async def unsilence(self, ctx: Context) -> None:
         """Unsiilence the current channel."""
+        if not ctx.channel.permissions_for(ctx.author).manage_messages:
+            await ctx.send(
+                f"{Emojis.cross_mark} sorry, you can't manage messages here")
+            log.debug(
+                f"{ctx.author} tried to unsilence #{ctx.channel} without manage messages permission")
+            return
+
         await self._get_instance_vars_event.wait()
         log.debug(
             f"Unsilencing channel #{ctx.channel} from {ctx.author}'s command.")
