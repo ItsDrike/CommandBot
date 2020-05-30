@@ -34,9 +34,7 @@ class UnsilenceScheduler(Scheduler):
     async def schedule_unsilence(self, channel: SilencedChannel) -> None:
         """Schedule expiration for silenced channels"""
         await self.bot.wait_until_guild_available()
-
         log.debug("Scheduling unsilencer")
-
         self.schedule_task(channel.id, channel)
 
     async def _scheduled_task(self, channel: SilencedChannel) -> None:
