@@ -82,9 +82,9 @@ class ConverterTests(unittest.TestCase):
             ('1y', 31_536_000),
             ('1year', 31_536_000),
             ('1years', 31_536_000),
-            ('1mo', 2_678_400),
-            ('1month', 2_678_400),
-            ('1months', 2_678_400),
+            ('1mo', 2_592_000),
+            ('1month', 2_592_000),
+            ('1months', 2_592_000),
             ('1w', 604_800),
             ('1W', 604_800),
             ('1week', 604_800),
@@ -108,7 +108,7 @@ class ConverterTests(unittest.TestCase):
             # Complex duration strings
             (
                 '1y1mo1w1d1h1m1s',
-                34_909_261
+                34_822_861
             ),
             ('5y100S', 157_766_500),
             ('2w28H', 1_310_400),
