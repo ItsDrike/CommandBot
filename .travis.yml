@@ -1,21 +1,18 @@
 language: python
-# WORKON_HOME sets where pipenv will place the virtualenv. We do this so that we can capture
-#  the environment in the cache for travis-ci.
-#  PIP_CACHE_DIR tells pip to cache our pip packages in the same path, so that we also
-#  cache the downloads.
-variables:
+
+env: # Set env variables for pipenv
   WORKON_HOME: .pipenv/venvs
   PIP_CACHE_DIR: .pipenv/pipcache
 
-# Make sure travis-ci knows to always cache the .pipenv path
 cache:
-  key: pipenv
-  paths:
-    - .pipenv
+    directories:
+    - .pipenv # Make sure travis-ci knows to always cache the .pipenv path
+
 python:
     - "3.8"
+
 install:
-    - "pip install pipenv"
     - "pipenv sync"
+
 script:
     - "pipenv run test"
