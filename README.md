@@ -1,5 +1,9 @@
 # CommandBot
 
+[![Discord](https://img.shields.io/static/v1?label=ItsDrike&logo=discord&message=Join&color=%237289DA&logoColor=white)](https://discord.gg/ZVyn3fk)
+[![Build Status](https://travis-ci.com/ItsDrike/CommandBot.svg?branch=master)](https://travis-ci.com/ItsDrike/CommandBot)
+
+
 ## About the bot
 
 CommandBot can manage most of your administrative tasks on your server
