@@ -10,7 +10,7 @@ from discord.ext.commands import Bot, Cog, Command, Context, Group, HelpCommand
 from fuzzywuzzy import fuzz, process
 
 from bot import constants
-from bot.constants import Channels, Emojis, STAFF_ROLES
+from bot.constants import STAFF_ROLES, Channels, Emojis
 from bot.decorators import redirect_output
 from bot.pagination import LinePaginator
 

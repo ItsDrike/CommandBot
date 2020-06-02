@@ -9,8 +9,8 @@ import discord
 from dateutil.relativedelta import relativedelta
 from discord.ext.commands import BadArgument, Context, Converter, UserConverter
 
-from bot.utils.checks import with_role_check
 from bot.constants import MODERATION_ROLES
+from bot.utils.checks import with_role_check
 
 log = logging.getLogger(__name__)
 

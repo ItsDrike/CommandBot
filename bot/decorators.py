@@ -11,7 +11,7 @@ from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import CheckFailure, Cog, Context
 
-from bot.constants import ERROR_REPLIES, Channels, RedirectOutput, Emojis
+from bot.constants import ERROR_REPLIES, Channels, Emojis, RedirectOutput
 from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)

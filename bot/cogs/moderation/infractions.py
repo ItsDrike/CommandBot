@@ -12,10 +12,10 @@ from discord.ext.commands import Context, command
 from bot import constants
 from bot.bot import Bot
 from bot.constants import Event
+from bot.converters import Expiry, FetchedMember
 from bot.decorators import respect_role_hierarchy, with_role
 from bot.utils import infractions
 from bot.utils.checks import has_higher_role_check
-from bot.converters import Expiry, FetchedMember
 
 from . import utils
 from .modlog import ModLog
