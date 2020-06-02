@@ -437,7 +437,9 @@ class MockEmoji(CustomMockMixin, unittest.mock.MagicMock):
         self.guild = kwargs.get("guild", MockGuild())
 
 
-partial_emoji_instance = discord.PartialEmoji(animated=False, name="guido")
+# TODO: When server emojis are added, we should change `notimplementedemoji` to some server emoji
+partial_emoji_instance = discord.PartialEmoji(
+    animated=False, name="notimplementedemoji")
 
 
 class MockPartialEmoji(CustomMockMixin, unittest.mock.MagicMock):
