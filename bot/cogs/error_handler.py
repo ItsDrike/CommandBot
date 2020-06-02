@@ -1,7 +1,7 @@
 import logging
 import typing as t
 
-from discord.ext.commands import Cog, Command, Context, errors
+from discord.ext.commands import Cog, Context, errors
 from sentry_sdk import push_scope
 
 from bot.bot import Bot
@@ -67,27 +67,21 @@ class ErrorHandler(Cog):
 
     @staticmethod
     async def command_not_found(ctx: Context) -> None:
-        '''
+        """
         Send an error message in 'ctx' for CommandNotFound error
-        '''
+        """
         log.debug(
             f"{ctx.author} tried to use an invalid command ({ctx.message.content})"
         )
-        await ctx.send('Command not found, use !help for help')
+        await ctx.send("Command not found, use !help for help")
 
-    async def get_help_command(self, command: t.Optional[Command]) -> t.Tuple:
-        """Return the help command invocation args to display help for `command`."""
-        parent = None
-        if command is not None:
-            parent = command.parent
+    @staticmethod
+    def get_help_command(ctx: Context) -> t.Coroutine:
+        """Return a prepared `help` command invocation coroutine."""
+        if ctx.command:
+            return ctx.send_help(ctx.command)
 
-        # Retrieve the help command for the invoked command.
-        if parent and command:
-            return self.bot.get_command("help"), parent.name, command.name
-        elif command:
-            return self.bot.get_command("help"), command.name
-        else:
-            return self.bot.get_command("help")
+        return ctx.send_help()
 
     async def handle_user_input_error(self, ctx: Context, e: errors.UserInputError) -> None:
         """
@@ -100,24 +94,24 @@ class ErrorHandler(Cog):
         * ArgumentParsingError: send an error message
         * Other: send an error message and the help command
         """
-        help_command = await self.get_help_command(ctx.command)
+        help_command = self.get_help_command(ctx)
 
         if isinstance(e, errors.MissingRequiredArgument):
             await ctx.send(f"Missing required argument `{e.param.name}`.")
-            await ctx.invoke(*help_command)
+            await help_command
         elif isinstance(e, errors.TooManyArguments):
             await ctx.send("Too many arguments provided.")
-            await ctx.invoke(*help_command)
+            await help_command
         elif isinstance(e, (errors.BadArgument, errors.BadUnionArgument)):
             await ctx.send(f"Bad argument: {e}\n")
-            await ctx.invoke(*help_command)
-        # elif isinstance(e, errors.BadUnionArgument):
-        #     await ctx.send(f"Bad argument: {e}\n```{e.errors[-1]}```")
+            await help_command
+        elif isinstance(e, errors.BadUnionArgument):
+            await ctx.send(f"Bad argument: {e}\n```{e.errors[-1]}```")
         elif isinstance(e, errors.ArgumentParsingError):
             await ctx.send(f"Argument parsing error: {e}")
         else:
             await ctx.send("Something about your input seems off. Check the arguments:")
-            await ctx.invoke(*help_command)
+            await help_command
 
     @staticmethod
     async def handle_check_failure(ctx: Context, e: errors.CheckFailure) -> None:
