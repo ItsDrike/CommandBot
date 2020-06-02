@@ -101,7 +101,7 @@ class Infractions(InfractionScheduler, commands.Cog):
         await self.apply_ban(ctx, user, reason, duration)
 
     @with_role(*constants.STAFF_ROLES)
-    @command(aliases=['mute'])
+    @command(aliases=["mute"])
     async def tempmute(self, ctx: Context, user: Member, duration: Expiry, *, reason: str = None) -> None:
         """Temporarily mute a user for the given reason and duration."""
 
@@ -111,14 +111,14 @@ class Infractions(InfractionScheduler, commands.Cog):
     # region: Permanent shadow infractions
 
     @with_role(*constants.MODERATION_ROLES)
-    @command(hidden=True, aliases=['shadowkick', 'skick'])
+    @command(hidden=True, aliases=["shadowkick", "skick"])
     async def shadow_kick(self, ctx: Context, user: Member, *, reason: str = None) -> None:
         """Kick a user for the given reason without notifying the user."""
 
         await self.apply_kick(ctx, user, reason, hidden=True)
 
     @with_role(*constants.MODERATION_ROLES)
-    @command(hidden=True, aliases=['shadowban', 'sban'])
+    @command(hidden=True, aliases=["shadowban", "sban"])
     async def shadow_ban(self, ctx: Context, user: FetchedMember, *, reason: str = None) -> None:
         """Permanently ban a user for the given reason without notifying the user."""
 
@@ -128,14 +128,14 @@ class Infractions(InfractionScheduler, commands.Cog):
     # region: Temporary shadow infractions
 
     @with_role(*constants.MODERATION_ROLES)
-    @command(hidden=True, aliases=['shadowtempban', 'stempban'])
+    @command(hidden=True, aliases=["shadowtempban", "stempban"])
     async def shadow_tempban(self, ctx: Context, user: FetchedMember, duration: Expiry, *, reason: str = None) -> None:
         """Temporarily ban a user for the given reason and duration without notifying the user."""
 
         await self.apply_ban(ctx, user, reason, duration, hidden=True)
 
     @with_role(*constants.MODERATION_ROLES)
-    @command(hidden=True, aliases=['shadowtempmute', 'stempmute', 'shadowmute', 'smute'])
+    @command(hidden=True, aliases=["shadowtempmute", "stempmute", "shadowmute", "smute"])
     async def shadow_tempmute(self, ctx: Context, user: Member, duration: Expiry, *, reason: str = None) -> None:
         """Temporarily mute a user for the given reason and duration without notifying the user."""
 
@@ -192,7 +192,7 @@ class Infractions(InfractionScheduler, commands.Cog):
 
         # Get current user's active bans
         infs = infractions.get_active_infractions(
-            user, inf_type='ban')
+            user, inf_type="ban")
 
         # Determine if the user has any active ban infractions that override the current one
         for inf in infs:
@@ -226,7 +226,7 @@ class Infractions(InfractionScheduler, commands.Cog):
         """Apply a kick infraction"""
 
         infraction = infractions.Infraction(
-            user.id, 'kick', reason, ctx.author.id, datetime.now(), 0)
+            user.id, "kick", reason, ctx.author.id, datetime.now(), 0)
 
         # Do not send member_remove message to mod_log
         self.mod_log.ignore(Event.member_remove, user.id)
@@ -240,11 +240,11 @@ class Infractions(InfractionScheduler, commands.Cog):
         """Apply a mute infraction"""
 
         infraction = infractions.Infraction(
-            user.id, 'mute', reason, ctx.author.id, datetime.now(), duration)
+            user.id, "mute", reason, ctx.author.id, datetime.now(), duration)
 
         # Get current user's active mutes
         infs = infractions.get_active_infractions(
-            user, inf_type='mute')
+            user, inf_type="mute")
 
         # Determine if the user has any active mute infractions that override the current one
         for inf in infs:
@@ -280,7 +280,7 @@ class Infractions(InfractionScheduler, commands.Cog):
         """Apply a warn infraction"""
 
         infraction = infractions.Infraction(
-            user.id, 'warn', reason, ctx.author.id, datetime.now(), 0)
+            user.id, "warn", reason, ctx.author.id, datetime.now(), 0)
 
         infraction.add_to_database()
         await self.apply_infraction(ctx, infraction, user, hidden=hidden)
@@ -306,7 +306,7 @@ class Infractions(InfractionScheduler, commands.Cog):
                 icon_url=utils.INFRACTION_ICONS["mute"][1]
             )
 
-            log_text["Member"] = f'User {user.mention} (`{user.id}`)'
+            log_text["Member"] = f"User {user.mention} (`{user.id}`)"
             log_text["DM"] = "Sent" if notified else "**Failed**"
         else:
             log.info(f"Failed to unmute user {user_id}: user not found")

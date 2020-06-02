@@ -75,8 +75,8 @@ class Information(Cog):
             parsed_roles.append(role)
 
         if failed_roles:
-            msg = ':x: I could not convert the following role names to a role: \n-'
-            msg += '\n-'.join(failed_roles)
+            msg = ":x: I could not convert the following role names to a role: \n-"
+            msg += "\n-".join(failed_roles)
             await ctx.send(msg)
 
         for role in parsed_roles:
@@ -164,7 +164,7 @@ class Information(Cog):
     @in_whitelist(redirect=constants.Channels.commands, roles=constants.STAFF_ROLES)
     @command(name="infractions", aliases=["show_infractions"])
     async def infractions(self, ctx: Context, user: FetchedMember = None) -> None:
-        '''Return user's infractions'''
+        """Return user's infractions"""
 
         # TODO: Handle too long message
 
@@ -181,7 +181,7 @@ class Information(Cog):
             embed = Embed(
                 color=constants.Colours.soft_red,
                 title=random.choice(constants.NEGATIVE_REPLIES),
-                description='You may not use this command on users with higher role than yours'
+                description="You may not use this command on users with higher role than yours"
             )
             await ctx.send(embed=embed)
             return
@@ -190,7 +190,7 @@ class Information(Cog):
 
         # Send infractions as DM, if user has any (bypass for staff members)
         if not with_role_check(ctx, *constants.STAFF_ROLES) and not len(infractions.get_infractions(user)) == 0:
-            msg = f'Your infraction list was sent to you by DM, {user.mention}'
+            msg = f"Your infraction list was sent to you by DM, {user.mention}"
             await user.send(embed=embed)
             await ctx.send(msg)
         else:
@@ -251,7 +251,7 @@ class Information(Cog):
     async def rules(self, ctx: Context) -> None:
         """Show link to rules channel"""
         rules_channel = ctx.guild.get_channel(constants.Channels.rules)
-        await ctx.send(f'Please read the server rules at: {rules_channel.mention}')
+        await ctx.send(f"Please read the server rules at: {rules_channel.mention}")
 
     @command()
     async def rule(self, ctx: Context, number: int) -> None:
@@ -265,7 +265,7 @@ class Information(Cog):
 
         embed = Embed(
             title=f"#{number}: {rule['title']}",
-            description=rule['description'],
+            description=rule["description"],
             color=Colour.blurple()
         )
         await ctx.send(embed=embed)
@@ -276,7 +276,7 @@ class Information(Cog):
         created = time_since(user.created_at, max_units=3)
 
         name = str(user)
-        custom_status = ''
+        custom_status = ""
         if isinstance(user, Member):
             if user.nick:
                 name = f"{user.nick} ({name})"
@@ -291,12 +291,12 @@ class Information(Cog):
                 # This guards against a custom status with an emoji but no text, which will cause
                 # escape_markdown to raise an exception
                 # This can be reworked after a move to d.py 1.3.0+, which adds a CustomActivity class
-                if activity.name == 'Custom Status' and activity.state:
+                if activity.name == "Custom Status" and activity.state:
                     state = escape_markdown(activity.state)
-                    custom_status = f'Status: {state}\n'
+                    custom_status = f"Status: {state}\n"
         else:
             roles = None
-            mention = f'{user.name}#{user.discriminator}'
+            mention = f"{user.name}#{user.discriminator}"
 
         description = [
             textwrap.dedent(f"""
@@ -308,7 +308,7 @@ class Information(Cog):
             """).strip()
         ]
         if isinstance(user, Member):
-            description[0] += '\n'
+            description[0] += "\n"
             description[0] += textwrap.dedent(f"""
                 **Member Information**
                 Joined: {joined}
@@ -339,7 +339,7 @@ class Information(Cog):
         name = str(user)
         if isinstance(user, Member):
             if user.nick:
-                name = f'{user.nick} ({name})'
+                name = f"{user.nick} ({name})"
 
             roles = user.roles[1:]
         else:
@@ -388,7 +388,7 @@ class Information(Cog):
             infraction_counter = defaultdict(int)
             for infraction in infs:
                 infraction_type = infraction.type
-                infraction_active = 'active' if infraction.is_active else 'inactive'
+                infraction_active = "active" if infraction.is_active else "inactive"
 
                 infraction_types.add(infraction_type)
                 infraction_counter[f"{infraction_active} {infraction_type}"] += 1
@@ -426,11 +426,11 @@ class Information(Cog):
                 # Append the infraction to infractions_dict with type as key
                 infractions_dict[infraction_type].append(infraction)
 
-            line = '```yaml\n'
+            line = "```yaml\n"
             for infraction_type in sorted(infraction_types):
                 # Get total infraction amount
                 infractions_amt = len(infractions_dict[infraction_type])
-                line += f'{infraction_type}s: {infractions_amt}\n'
+                line += f"{infraction_type}s: {infractions_amt}\n"
                 # Print details about infractions with current type
                 for infraction in infractions_dict[infraction_type]:
                     # Get actors name if possible
@@ -438,15 +438,15 @@ class Information(Cog):
                     if not isinstance(actor, Member):
                         actor = infraction.actor_id
                     else:
-                        actor = f'{actor.name}#{actor.discriminator}'
+                        actor = f"{actor.name}#{actor.discriminator}"
 
-                    line += f'  - {(infraction.reason)}\n'
-                    line += f'      ID: {infraction.id}\n'
-                    line += f'      duration: {infraction.str_duration}\n'
-                    line += f'      given: {infraction.time_since_start}\n'
-                    line += f'      actor: {actor}\n'
+                    line += f"  - {(infraction.reason)}\n"
+                    line += f"      ID: {infraction.id}\n"
+                    line += f"      duration: {infraction.str_duration}\n"
+                    line += f"      given: {infraction.time_since_start}\n"
+                    line += f"      actor: {actor}\n"
             line = line[:-1]
-            line += '```'
+            line += "```"
 
             return line
 
@@ -464,7 +464,7 @@ class Information(Cog):
                 infraction_output.append(
                     "This user has no active infractions.")
             else:
-                infraction_output.append(f'TOTAL: {len(active_infs)}')
+                infraction_output.append(f"TOTAL: {len(active_infs)}")
                 infraction_output.append(
                     get_infractions_by_type(guild, active_infs))
             infraction_output.append("**Inactive Infractions**")
@@ -472,11 +472,11 @@ class Information(Cog):
                 infraction_output.append(
                     "This user has no inactive infractions.")
             else:
-                infraction_output.append(f'TOTAL: {len(inactive_infs)}')
+                infraction_output.append(f"TOTAL: {len(inactive_infs)}")
                 infraction_output.append(
                     get_infractions_by_type(guild, inactive_infs))
 
-        return '\n'.join(infraction_output)
+        return "\n".join(infraction_output)
 
     # endregion: Infractions sub-functions
 

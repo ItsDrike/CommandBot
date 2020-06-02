@@ -94,7 +94,7 @@ class Embeds(Cog):
 
     # endregion
     # region: embed build
-    @group(invoke_without_command=True, name='embed', aliases=["embedset"])
+    @group(invoke_without_command=True, name="embed", aliases=["embedset"])
     @with_role(*MODERATION_ROLES)
     async def embed_group(self, ctx: Context) -> None:
         """Commands for configuring the Embed message"""
@@ -302,5 +302,5 @@ class Embeds(Cog):
 
 
 def setup(bot: Bot) -> None:
-    '''Load the Embeds cog.'''
+    """Load the Embeds cog."""
     bot.add_cog(Embeds(bot))

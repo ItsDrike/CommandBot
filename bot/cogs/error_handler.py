@@ -67,13 +67,13 @@ class ErrorHandler(Cog):
 
     @staticmethod
     async def command_not_found(ctx: Context) -> None:
-        '''
+        """
         Send an error message in 'ctx' for CommandNotFound error
-        '''
+        """
         log.debug(
             f"{ctx.author} tried to use an invalid command ({ctx.message.content})"
         )
-        await ctx.send('Command not found, use !help for help')
+        await ctx.send("Command not found, use !help for help")
 
     async def get_help_command(self, command: t.Optional[Command]) -> t.Tuple:
         """Return the help command invocation args to display help for `command`."""

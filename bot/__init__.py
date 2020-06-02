@@ -8,12 +8,12 @@ from pathlib import Path
 import coloredlogs
 
 # Setup some parameters for logging
-format_string = '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
+format_string = "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
 log_level = logging.DEBUG
 log_format = logging.Formatter(format_string)
 
 # Setup logging file
-log_file = Path('logs', 'bot.log')
+log_file = Path("logs", "bot.log")
 log_file.parent.mkdir(exist_ok=True)
 file_handler = handlers.RotatingFileHandler(
     log_file, maxBytes=5242880, backupCount=7)
@@ -37,15 +37,15 @@ coloredlogs.DEFAULT_LOG_LEVEL = log_level
 coloredlogs.install(logger=root_logger, stream=sys.stdout)
 
 # Set other logging levels on imported modules
-logging.getLogger('discord').setLevel(logging.WARNING)
-logging.getLogger('websockets').setLevel(logging.WARNING)
-logging.getLogger('deepdiff').setLevel(logging.WARNING)
-logging.getLogger('asyncio').setLevel(logging.INFO)
-logging.getLogger('bot.utils.checks').setLevel(logging.INFO)
-logging.getLogger('bot.pagination').setLevel(logging.INFO)
-logging.getLogger('bot.utils.infractions').setLevel(logging.INFO)
-logging.getLogger('bot.utils.scheduling').setLevel(logging.INFO)
-logging.getLogger('bot.decorators').setLevel(logging.INFO)
+logging.getLogger("discord").setLevel(logging.WARNING)
+logging.getLogger("websockets").setLevel(logging.WARNING)
+logging.getLogger("deepdiff").setLevel(logging.WARNING)
+logging.getLogger("asyncio").setLevel(logging.INFO)
+logging.getLogger("bot.utils.checks").setLevel(logging.INFO)
+logging.getLogger("bot.pagination").setLevel(logging.INFO)
+logging.getLogger("bot.utils.infractions").setLevel(logging.INFO)
+logging.getLogger("bot.utils.scheduling").setLevel(logging.INFO)
+logging.getLogger("bot.decorators").setLevel(logging.INFO)
 
 logging.getLogger(__name__)
 

@@ -39,7 +39,7 @@ class InfractionScheduler(Scheduler):
         """Schedule expiration for previous infractions."""
         await self.bot.wait_until_guild_available()
 
-        log.debug('Rescheduling infractions')
+        log.debug("Rescheduling infractions")
 
         infractions = get_all_active_infractions()
 
@@ -73,18 +73,18 @@ class InfractionScheduler(Scheduler):
 
         # Ignore duration in instant infractions
         if inf_type in ("kick", "warn"):
-            expiry_msg = ''
-            expiry_log = ''
-        elif duration == 'permanent':
-            expiry_msg = '**permanently**'
-            expiry_log = 'Duration: permanent'
+            expiry_msg = ""
+            expiry_log = ""
+        elif duration == "permanent":
+            expiry_msg = "**permanently**"
+            expiry_log = "Duration: permanent"
         else:
-            expiry_msg = f'for {duration}'
-            expiry_log = f'Duration: {duration}'
+            expiry_msg = f"for {duration}"
+            expiry_log = f"Duration: {duration}"
 
         # DM the user about infraction if it's not hidden infraction
         if not hidden:
-            dm_result = ':no_bell:'
+            dm_result = ":no_bell:"
             dm_log_text = "\nDM: **Failed**"
 
             # Sometimes user is a discord.Object; make it a proper user
@@ -93,11 +93,11 @@ class InfractionScheduler(Scheduler):
                     user = await self.bot.fetch_user(user.id)
             except discord.HTTPException as e:
                 log.error(
-                    f'Failed to DM {user.id}: could not fetch user (status: {e.status})')
+                    f"Failed to DM {user.id}: could not fetch user (status: {e.status})")
             else:
                 # Accordingly display wheather the user was successfully notified via DM
                 if await utils.notify_infraction(user, inf_type, duration, reason, icon):
-                    dm_result = ':bell:'
+                    dm_result = ":bell:"
                     dm_log_text = "\nDM: Sent"
 
         # Include total infractions count in STAFF_CHANNELS
@@ -122,7 +122,7 @@ class InfractionScheduler(Scheduler):
 
                 log_msg = f"Failed to apply {inf_type} infraction #{id_} to {user}"
                 if isinstance(e, discord.Forbidden):
-                    log.warning(f'{log_msg}: bot lacks permissions.')
+                    log.warning(f"{log_msg}: bot lacks permissions.")
                 else:
                     log.exception(log_msg)
 
@@ -132,7 +132,7 @@ class InfractionScheduler(Scheduler):
         await self.mod_log.send_log_message(
             icon_url=icon,
             colour=Colours.soft_red,
-            title=f'Infractions {log_title}: {inf_type}',
+            title=f"Infractions {log_title}: {inf_type}",
             thumbnail=user.avatar_url_as(static_format="png"),
             text=textwrap.dedent(f"""
                 Member: {user.mention} (`{user.id}`)
@@ -144,7 +144,7 @@ class InfractionScheduler(Scheduler):
             footer=f"ID: {infraction.id}"
         )
 
-        log.info(f'Applied {inf_type} infraction #{id_} to {user}')
+        log.info(f"Applied {inf_type} infraction #{id_} to {user}")
 
     async def pardon_infraction(
         self,
@@ -164,7 +164,7 @@ class InfractionScheduler(Scheduler):
         log_text["Pardoned"] = str(ctx.message.author)
         log_content = None
         id_ = infraction.id
-        footer = f'ID: {id_}'
+        footer = f"ID: {id_}"
         user = await self.bot.fetch_user(infraction.user_id)
 
         # If multiple active infractions with shorter end_time were found, get their IDs
@@ -178,7 +178,7 @@ class InfractionScheduler(Scheduler):
             footer = f"Infraction IDs: {', '.join(ids)}"
 
         dm_emoji = ""
-        if log_text.get('DM') == "Sent":
+        if log_text.get("DM") == "Sent":
             dm_emoji = ":incoming_envelope:"
         elif "DM" in log_text:
             dm_emoji = f"{constants.Emojis.failmail}"
@@ -281,7 +281,7 @@ class InfractionScheduler(Scheduler):
                     )
             except discord.Forbidden:
                 log.warning(
-                    f'Failed to deactivate infraction #{id_} ({type_})')
+                    f"Failed to deactivate infraction #{id_} ({type_})")
                 log_text["Failure"] = "The bot lacks permissions to do this (role hierarchy?)"
                 log_content = staff_role.mention
             except discord.HTTPException as e:
@@ -291,7 +291,7 @@ class InfractionScheduler(Scheduler):
                 log_content = staff_role.mention
         else:
             log.debug(
-                'Pardon action aborted, there are longer infractions of the same type')
+                "Pardon action aborted, there are longer infractions of the same type")
             log_text["Note"] = "Infraction not pardoned: There are longer infractions"
 
         # If multiple active infractions with shorter end_time were found, mark them as inactive in the database
@@ -339,17 +339,17 @@ class InfractionScheduler(Scheduler):
         """Remove given infraction from database"""
 
         if not infraction:
-            await ctx.send(':x: No such infraction')
+            await ctx.send(":x: No such infraction")
             return
         # Try to pardon it first
         log_text = await self.pardon_infraction(ctx, infraction, send_log=False)
 
         remove_infraction(infraction)
 
-        log_title = 'Removed and Pardoned'
+        log_title = "Removed and Pardoned"
 
         if not log_text:
-            log_title = 'Removed'
+            log_title = "Removed"
 
             actor = infraction.actor_id
             actor_usr = await self.bot.fetch_user(actor)
@@ -370,7 +370,7 @@ class InfractionScheduler(Scheduler):
 
         log.info(
             f"Removed {infraction.type} infraction #{infraction.id} for {user}")
-        await ctx.send(f':exclamation: Infraction #{infraction.id} **{infraction.type}** has been **removed** for {user.mention}')
+        await ctx.send(f":exclamation: Infraction #{infraction.id} **{infraction.type}** has been **removed** for {user.mention}")
 
         await self.mod_log.send_log_message(
             icon_url=constants.Icons.token_removed,

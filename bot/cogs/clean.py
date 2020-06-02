@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class Clean(Cog):
-    '''
+    """
     A cog which allows messages to be deleted
-    '''
+    """
 
     def __init__(self, bot):
         self.bot = bot
@@ -26,8 +26,8 @@ class Clean(Cog):
 
     @property
     def mod_log(self):
-        '''Get currently loaded ModLog cog instance'''
-        return self.bot.get_cog('ModLog')
+        """Get currently loaded ModLog cog instance"""
+        return self.bot.get_cog("ModLog")
 
     async def _clean_messages(
         self,
@@ -38,18 +38,18 @@ class Clean(Cog):
         regex: Optional[str] = None,
         channel: Optional[TextChannel] = None
     ) -> None:
-        '''A helper function that does the actual message cleaning'''
+        """A helper function that does the actual message cleaning"""
 
         def predicate_bots_only(message: Message) -> bool:
-            '''Return True if the message was sent by a bot.'''
+            """Return True if the message was sent by a bot."""
             return message.author.bot
 
         def predicate_specific_user(message: Message) -> bool:
-            '''Return True if the message was sent by the user provided in the _clean_messages call.'''
+            """Return True if the message was sent by the user provided in the _clean_messages call."""
             return message.author == user
 
         def predicate_regex(message: Message) -> bool:
-            '''Check if the regex provided in _clean_messages matches the message content or any embed attributes.'''
+            """Check if the regex provided in _clean_messages matches the message content or any embed attributes."""
             content = [message.content]
 
             # Add the content for all embed attributes
@@ -64,7 +64,7 @@ class Clean(Cog):
 
             # Get rid of empty attributes and turn it into a string
             content = [attr for attr in content if attr]
-            content = '\n'.join(content)
+            content = "\n".join(content)
 
             # Now let's see if there's a regex match
             if not content:
@@ -77,7 +77,7 @@ class Clean(Cog):
             embed = Embed(
                 color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
-                description=f'You can clean maximum {CleanMessages.message_limit} messages.'
+                description=f"You can clean maximum {CleanMessages.message_limit} messages."
             )
             await ctx.send(embed=embed)
             return
@@ -91,7 +91,7 @@ class Clean(Cog):
             embed = Embed(
                 color=Colours.soft_red,
                 title=random.choice(NEGATIVE_REPLIES),
-                description='You can only use clean in the channel where you are'
+                description="You can only use clean in the channel where you are"
             )
             await ctx.send(embed=embed)
             return
@@ -101,7 +101,7 @@ class Clean(Cog):
             embed = Embed(
                 color=Colour(Colours.soft_red),
                 title=random.choice(NEGATIVE_REPLIES),
-                description='Please wait for the currently ongoing clean operation to complete.'
+                description="Please wait for the currently ongoing clean operation to complete."
             )
             await ctx.send(embed=embed)
             return
@@ -157,32 +157,32 @@ class Clean(Cog):
         if not messages:
             embed = Embed(
                 color=Colour(Colours.soft_red),
-                description='No matching messages could be found.'
+                description="No matching messages could be found."
             )
             await ctx.send(embed=embed, delete_after=10)
             return
 
         # Build the embed and send it
         message = (
-            f'**{len(message_ids)}** messages deleted in <#{channel.id}> by **{ctx.author.name}**\n\n'
+            f"**{len(message_ids)}** messages deleted in <#{channel.id}> by **{ctx.author.name}**\n\n"
         )
 
         await self.mod_log.send_log_message(
             icon_url=Icons.message_bulk_delete,
             colour=Colour(Colours.soft_red),
-            title='Bulk message delete',
+            title="Bulk message delete",
             text=message,
             channel_id=Channels.mod_log,
         )
 
     # When no subcommand was found, invoke help
-    @group(invoke_without_command=True, name='clean', aliases=['purge', 'clear'])
+    @group(invoke_without_command=True, name="clean", aliases=["purge", "clear"])
     @with_role(*STAFF_ROLES)
     async def clean_group(self, ctx: Context) -> None:
-        '''Commands for cleaning messages in channels.'''
+        """Commands for cleaning messages in channels."""
         await ctx.send_help(ctx.command)
 
-    @clean_group.command(name='user', aliases=['users'])
+    @clean_group.command(name="user", aliases=["users"])
     @with_role(*STAFF_ROLES)
     async def clean_user(
         self,
@@ -191,7 +191,7 @@ class Clean(Cog):
         amount: Optional[int] = 10,
         channel: TextChannel = None
     ) -> None:
-        '''Delete messages posted by the provided user, stop cleaning after traversing `amount` messages.'''
+        """Delete messages posted by the provided user, stop cleaning after traversing `amount` messages."""
         if has_higher_role_check(ctx, user):
             await self._clean_messages(amount, ctx, user=user, channel=channel)
         else:
@@ -200,7 +200,7 @@ class Clean(Cog):
                 "someone with an equal or higher top role."
             )
 
-    @clean_group.command(name='all', aliases=['everything'])
+    @clean_group.command(name="all", aliases=["everything"])
     @with_role(*MODERATION_ROLES)
     async def clean_all(
         self,
@@ -208,10 +208,10 @@ class Clean(Cog):
         amount: Optional[int] = 10,
         channel: TextChannel = None
     ) -> None:
-        '''Delete all messages, regardless of poster, stop cleaning after traversing `amount` messages.'''
+        """Delete all messages, regardless of poster, stop cleaning after traversing `amount` messages."""
         await self._clean_messages(amount, ctx, channel=channel)
 
-    @clean_group.command(name='bots', aliases=['bot'])
+    @clean_group.command(name="bots", aliases=["bot"])
     @with_role(*MODERATION_ROLES)
     async def clean_bots(
         self,
@@ -219,10 +219,10 @@ class Clean(Cog):
         amount: Optional[int] = 10,
         channel: TextChannel = None
     ) -> None:
-        '''Delete all messages posted by a bot, stop cleaning after traversing `amount` messages.'''
+        """Delete all messages posted by a bot, stop cleaning after traversing `amount` messages."""
         await self._clean_messages(amount, ctx, bots_only=True, channel=channel)
 
-    @clean_group.command(name='regex', aliases=['word', 'expression'])
+    @clean_group.command(name="regex", aliases=["word", "expression"])
     @with_role(*MODERATION_ROLES)
     async def clean_regex(
         self,
@@ -231,22 +231,22 @@ class Clean(Cog):
         amount: Optional[int] = 10,
         channel: TextChannel = None
     ) -> None:
-        '''Delete all messages that match a certain regex, stop cleaning after traversing `amount` messages.'''
+        """Delete all messages that match a certain regex, stop cleaning after traversing `amount` messages."""
         await self._clean_messages(amount, ctx, regex=regex, channel=channel)
 
-    @clean_group.command(name='stop', aliases=['cancel', 'abort'])
+    @clean_group.command(name="stop", aliases=["cancel", "abort"])
     @with_role(*MODERATION_ROLES)
     async def clean_cancel(self, ctx: Context) -> None:
-        '''If there is an ongoing cleaning process, attempt to immediately cancel it.'''
+        """If there is an ongoing cleaning process, attempt to immediately cancel it."""
         self.cleaning = False
 
         embed = Embed(
             color=Colour.blurple(),
-            description='Clean interrupted.'
+            description="Clean interrupted."
         )
         await ctx.send(embed=embed, delete_after=10)
 
 
 def setup(bot: Bot) -> None:
-    '''Load the Clean cog.'''
+    """Load the Clean cog."""
     bot.add_cog(Clean(bot))

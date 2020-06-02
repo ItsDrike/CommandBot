@@ -62,11 +62,11 @@ class DiceThrow(Converter):
                 f"`{dice_string}` is not a valid dice throw string.")
 
         dice_dict = {
-            param: (int(amount) if amount != '' else 1)
+            param: (int(amount) if amount != "" else 1)
             for param, amount in match.groupdict(default=1).items()
         }
 
-        return (dice_dict['throws'], dice_dict['sides'])
+        return (dice_dict["throws"], dice_dict["sides"])
 
 
 class SilenceDurationConverter(Converter):

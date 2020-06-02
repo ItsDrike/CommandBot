@@ -43,7 +43,7 @@ class LinePaginator(Paginator):
     """
 
     def __init__(
-        self, prefix: str = '```', suffix: str = '```', max_size: int = 2000, max_lines: int = None
+        self, prefix: str = "```", suffix: str = "```", max_size: int = 2000, max_lines: int = None
     ) -> None:
         """
         This function overrides the Paginator.__init__ from inside discord.ext.commands.
@@ -59,7 +59,7 @@ class LinePaginator(Paginator):
         self._count = len(prefix) + 1  # prefix + newline
         self._pages = []
 
-    def add_line(self, line: str = '', *, empty: bool = False) -> None:
+    def add_line(self, line: str = "", *, empty: bool = False) -> None:
         """
         Adds a line to the current page.
 
@@ -70,8 +70,10 @@ class LinePaginator(Paginator):
         It overrides in order to allow us to configure the maximum number of lines per page.
         """
         if len(line) > self.max_size - len(self.prefix) - 2:
-            raise RuntimeError('Line exceeds maximum page size %s' %
-                               (self.max_size - len(self.prefix) - 2))
+            raise RuntimeError(
+                "Line exceeds maximum page size %s" %
+                (self.max_size - len(self.prefix) - 2)
+            )
 
         if self.max_lines is not None:
             if self._linecount >= self.max_lines:
@@ -86,7 +88,7 @@ class LinePaginator(Paginator):
         self._current_page.append(line)
 
         if empty:
-            self._current_page.append('')
+            self._current_page.append("")
             self._count += 1
 
     @classmethod
@@ -324,7 +326,7 @@ class ImagePaginator(Paginator):
         self._pages = []
         self._count = 0
 
-    def add_line(self, line: str = '', *, empty: bool = False) -> None:
+    def add_line(self, line: str = "", *, empty: bool = False) -> None:
         """Adds a line to each page."""
         if line:
             self._count = len(line)

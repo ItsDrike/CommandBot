@@ -286,11 +286,11 @@ class ModLog(Cog, name="ModLog"):
             return
 
         infs = infractions.get_active_infractions(
-            member, inf_type='ban')
+            member, inf_type="ban")
         # Check if there are no infractions for this ban, if there aren't log it
         if len(infs) == 0:
             infractions.Infraction(
-                member.id, 'ban', 'Unknown/Server banned', self.bot.user.id, datetime.now(), 1_000_000_000, write_to_db=True)
+                member.id, "ban", "Unknown/Server banned", self.bot.user.id, datetime.now(), 1_000_000_000, write_to_db=True)
 
         await self.send_log_message(
             Icons.user_ban, Colours.soft_red,
@@ -316,9 +316,9 @@ class ModLog(Cog, name="ModLog"):
             message = f"{Emojis.new} {message}"
 
         guest_role = member.guild.get_role(Roles.guests)
-        await member.add_roles(guest_role, reason='AutoRole')
+        await member.add_roles(guest_role, reason="AutoRole")
 
-        log.info(f'User {member} has joined')
+        log.info(f"User {member} has joined")
 
         await self.send_log_message(
             Icons.sign_in, Colours.soft_green,
@@ -337,7 +337,7 @@ class ModLog(Cog, name="ModLog"):
             self._ignored[Event.member_remove].remove(member.id)
             return
 
-        log.info(f'User {member} has left')
+        log.info(f"User {member} has left")
 
         member_str = escape_markdown(str(member))
         await self.send_log_message(
@@ -359,7 +359,7 @@ class ModLog(Cog, name="ModLog"):
 
         # Pardon active ban infraction(s)
         infs = infractions.get_active_infractions(
-            member, inf_type='ban')
+            member, inf_type="ban")
         for infraction in infs:
             await infraction.pardon(guild, self.bot, force=True)
 
@@ -604,12 +604,12 @@ class ModLog(Cog, name="ModLog"):
         content_after: t.List[str] = []
 
         for index, (diff_type, words) in enumerate(diff_groups):
-            sub = ' '.join(words)
-            if diff_type == '-':
+            sub = " ".join(words)
+            if diff_type == "-":
                 content_before.append(f"[{sub}](http://o.hi)")
-            elif diff_type == '+':
+            elif diff_type == "+":
                 content_after.append(f"[{sub}](http://o.hi)")
-            elif diff_type == ' ':
+            elif diff_type == " ":
                 if len(words) > 2:
                     sub = (
                         f"{words[0] if index > 0 else ''}"

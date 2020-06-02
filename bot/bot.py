@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from bot import constants
 
-log = logging.getLogger('bot')
+log = logging.getLogger("bot")
 
 
 class Bot(commands.Bot):

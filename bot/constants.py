@@ -10,14 +10,14 @@ import yaml
 # Paths
 BOT_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(BOT_DIR, os.pardir))
-DEFAULT_CONFIG_FILE = os.path.join(PROJECT_ROOT, 'default_config.yaml')
-CONFIG_FILE = os.path.join(PROJECT_ROOT, 'config.yaml')
+DEFAULT_CONFIG_FILE = os.path.join(PROJECT_ROOT, "default_config.yaml")
+CONFIG_FILE = os.path.join(PROJECT_ROOT, "config.yaml")
 
 log = logging.getLogger(__name__)
 
 
 def _env_var_constructor(loader, node):
-    '''
+    """
     Implements a custom YAML tag for loading optional environment
     variables. If the environment variable is set, returns the
     value of it. Otherwise, returns `None`.
@@ -27,12 +27,12 @@ def _env_var_constructor(loader, node):
         # Optional app configuration. Set `MY_APP_KEY` in the environment to use it.
         application:
             key: !ENV 'MY_APP_KEY'
-    '''
+    """
 
     default = None
 
     # Check if the node is a plain string value
-    if node.id == 'scalar':
+    if node.id == "scalar":
         value = loader.construct_scalar(node)
         key = str(value)
     else:
@@ -50,9 +50,9 @@ def _env_var_constructor(loader, node):
     return os.getenv(key, default)
 
 
-yaml.SafeLoader.add_constructor('!ENV', _env_var_constructor)
+yaml.SafeLoader.add_constructor("!ENV", _env_var_constructor)
 
-with open(DEFAULT_CONFIG_FILE, encoding='UTF-8') as f:
+with open(DEFAULT_CONFIG_FILE, encoding="UTF-8") as f:
     _CONFIG_YAML = yaml.safe_load(f)
 
 
@@ -83,7 +83,7 @@ if Path(CONFIG_FILE).exists():
 
 
 class YAMLGetter(type):
-    '''
+    """
     Implements a custom metaclass used for accessing
     configuration data by simply accessing class attributes.
     Supports getting configuration from up to two levels
@@ -114,7 +114,7 @@ class YAMLGetter(type):
             if isinstance(message.channel, PrivateChannel):
                 return Prefixes.direct_message
             return Prefixes.guild
-    '''
+    """
 
     subsection = None
 
@@ -126,32 +126,32 @@ class YAMLGetter(type):
                 return _CONFIG_YAML[cls.section][cls.subsection][name]
             return _CONFIG_YAML[cls.section][name]
         except KeyError:
-            dotted_path = '.'.join(
+            dotted_path = ".".join(
                 (cls.section, cls.subsection, name)
                 if cls.subsection is not None else (cls.section, name)
             )
             log.critical(
-                f'Tried accessing configuration variable at `{dotted_path}`, but it could not be found.')
+                f"Tried accessing configuration variable at `{dotted_path}`, but it could not be found.")
             raise
 
     def __getitem__(cls, name):
         return cls.__getattr__(name)
 
     def __iter__(cls):
-        '''Return generator of key: value pairs of current constants class' config values.'''
+        """Return generator of key: value pairs of current constants class' config values."""
         for name in cls.__annotations__:
             yield name, getattr(cls, name)
 
 
 class Bot(metaclass=YAMLGetter):
-    section = 'bot'
+    section = "bot"
 
     prefix: str
     token: str
 
 
 class Guild(metaclass=YAMLGetter):
-    section = 'guild'
+    section = "guild"
 
     id: int
     moderation_channels: List[int]
@@ -164,8 +164,8 @@ class Guild(metaclass=YAMLGetter):
 
 
 class Roles(metaclass=YAMLGetter):
-    section = 'guild'
-    subsection = 'roles'
+    section = "guild"
+    subsection = "roles"
 
     staff: int
     guests: int
@@ -179,8 +179,8 @@ class Roles(metaclass=YAMLGetter):
 
 
 class Channels(metaclass=YAMLGetter):
-    section = 'guild'
-    subsection = 'channels'
+    section = "guild"
+    subsection = "channels"
 
     announcements: int
     rules: int
@@ -204,18 +204,18 @@ class Channels(metaclass=YAMLGetter):
 
 
 class Rules(metaclass=YAMLGetter):
-    section = 'details'
+    section = "details"
     rules: Dict[int, Dict[str, str]]
 
 
 class Database(metaclass=YAMLGetter):
-    section = 'database'
+    section = "database"
 
     db_name: str
 
 
 class AntiSpam(metaclass=YAMLGetter):
-    section = 'anti_spam'
+    section = "anti_spam"
 
     punishment: Dict[str, Dict[str, int]]
     rules: Dict[str, Dict[str, int]]
@@ -223,7 +223,7 @@ class AntiSpam(metaclass=YAMLGetter):
 
 
 class Filter(metaclass=YAMLGetter):
-    section = 'filter'
+    section = "filter"
 
     domain_blacklist: List[int]
     word_watchlist: List[int]
@@ -233,33 +233,33 @@ class Filter(metaclass=YAMLGetter):
 
 
 class AntiMalware(metaclass=YAMLGetter):
-    section = 'anti_malware'
+    section = "anti_malware"
 
     whitelist: list
 
 
 class CleanMessages(metaclass=YAMLGetter):
-    section = 'clean_messages'
+    section = "clean_messages"
 
     message_limit: int
 
 
 class RedirectOutput(metaclass=YAMLGetter):
-    section = 'redirect_output'
+    section = "redirect_output"
 
     delete_invocation: bool
     delete_delay: int
 
 
 class Time(metaclass=YAMLGetter):
-    section = 'style'
+    section = "style"
 
     time_format: str
 
 
 class Colours(metaclass=YAMLGetter):
-    section = 'style'
-    subsection = 'colours'
+    section = "style"
+    subsection = "colours"
 
     soft_red: int
     soft_green: int
@@ -267,8 +267,8 @@ class Colours(metaclass=YAMLGetter):
 
 
 class Emojis(metaclass=YAMLGetter):
-    section = 'style'
-    subsection = 'emojis'
+    section = "style"
+    subsection = "emojis"
 
     defcon_disabled: str
     defcon_enabled: str
@@ -292,8 +292,8 @@ class Emojis(metaclass=YAMLGetter):
 
 
 class Icons(metaclass=YAMLGetter):
-    section = 'style'
-    subsection = 'icons'
+    section = "style"
+    subsection = "icons"
 
     crown_blurple: str
     crown_green: str
