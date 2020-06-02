@@ -75,7 +75,6 @@ class ErrorHandler(Cog):
         )
         await ctx.send("Command not found, use !help for help")
 
-
     @staticmethod
     def get_help_command(ctx: Context) -> t.Coroutine:
         """Return a prepared `help` command invocation coroutine."""
