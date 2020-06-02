@@ -299,7 +299,7 @@ class Embeds(Cog):
         else:
             await ctx.send(
                 f"{Emojis.cross_mark} {ctx.author.mention} No active embed found, "
-                f"are you in embed building mode? (`{Bot.prefix}help Embeds`)"
+                f"are you in embed building mode? (`{BotConstant.prefix}help Embeds`)"
             )
             return False
 
