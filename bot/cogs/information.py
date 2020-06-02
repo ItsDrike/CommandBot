@@ -13,10 +13,11 @@ from discord.utils import escape_markdown
 import bot.utils.infractions as infractions
 from bot import constants
 from bot.bot import Bot
-from bot.decorators import with_role, in_whitelist
+from bot.constants import Emojis
+from bot.converters import FetchedMember
+from bot.decorators import in_whitelist, with_role
 from bot.pagination import LinePaginator
 from bot.utils.checks import has_higher_role_check, with_role_check
-from bot.converters import FetchedMember
 from bot.utils.time import time_since
 
 log = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class Information(Cog):
             parsed_roles.append(role)
 
         if failed_roles:
-            msg = ":x: I could not convert the following role names to a role: \n-"
+            msg = f"{Emojis.cross_mark} I could not convert the following role names to a role: \n-"
             msg += "\n-".join(failed_roles)
             await ctx.send(msg)
 
@@ -135,10 +136,10 @@ class Information(Cog):
                 $channel_counts
 
                 **Members**
-                {constants.Emojis.status_online} {statuses[Status.online]:,}
-                {constants.Emojis.status_idle} {statuses[Status.idle]:,}
-                {constants.Emojis.status_dnd} {statuses[Status.dnd]:,}
-                {constants.Emojis.status_offline} {statuses[Status.offline]:,}
+                {Emojis.status_online} {statuses[Status.online]:,}
+                {Emojis.status_idle} {statuses[Status.idle]:,}
+                {Emojis.status_dnd} {statuses[Status.dnd]:,}
+                {Emojis.status_offline} {statuses[Status.offline]:,}
             """)
         ).substitute({"channel_counts": channel_counts})
         embed.set_thumbnail(url=ctx.guild.icon_url)
@@ -260,7 +261,7 @@ class Information(Cog):
         try:
             rule = rules[number]
         except KeyError:
-            await ctx.send(f":x: No such rule ({number})")
+            await ctx.send(f"{Emojis.cross_mark} No such rule ({number})")
             return
 
         embed = Embed(

@@ -11,7 +11,7 @@ from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import CheckFailure, Cog, Context
 
-from bot.constants import ERROR_REPLIES, Channels, RedirectOutput
+from bot.constants import ERROR_REPLIES, Channels, RedirectOutput, Emojis
 from bot.utils.checks import with_role_check, without_role_check
 
 log = logging.getLogger(__name__)
@@ -246,7 +246,7 @@ def respect_role_hierarchy(target_arg: Union[int, str] = 0) -> Callable:
                     f"{target} ({target.id}), who has an equal or higher top role."
                 )
                 await ctx.send(
-                    f":x: {actor.mention}, you may not {cmd} "
+                    f"{Emojis.cross_mark} {actor.mention}, you may not {cmd} "
                     "someone with an equal or higher top role."
                 )
             else:

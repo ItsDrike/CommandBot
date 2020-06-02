@@ -10,7 +10,7 @@ from discord.ext.commands import Context
 
 from bot import constants
 from bot.bot import Bot
-from bot.constants import STAFF_CHANNELS, Colours
+from bot.constants import STAFF_CHANNELS, Colours, Emojis
 from bot.utils import time
 from bot.utils.infractions import (Infraction, get_active_infractions,
                                    get_all_active_infractions, get_infractions,
@@ -115,7 +115,7 @@ class InfractionScheduler(Scheduler):
                 if not (infraction.duration == 1_000_000_000 or infraction.duration == 0):
                     self.schedule_task(infraction.id, infraction)
             except discord.HTTPException as e:
-                confirm_msg = f":x: (Failed to apply) User {user.mention} haven't been"
+                confirm_msg = f"{Emojis.cross_mark} (Failed to apply) User {user.mention} haven't been"
                 expiry_msg = ""
                 log_content = ctx.author.mention
                 log_title = "failed to apply"
@@ -156,7 +156,7 @@ class InfractionScheduler(Scheduler):
 
         if not infraction.is_active:
             if send_log:
-                await ctx.send(":x: This infraction is not active")
+                await ctx.send(f"{Emojis.cross_mark} This infraction is not active")
             return False
 
         log_text = await self.deactivate_infraction(infraction, send_log=False)
@@ -184,7 +184,7 @@ class InfractionScheduler(Scheduler):
             dm_emoji = f"{constants.Emojis.failmail}"
 
         if "Failure" in log_text:
-            confirm_msg = ":x: failed to pardon"
+            confirm_msg = f"{Emojis.cross_mark} failed to pardon"
             log_title = "pardon failed"
             log_content = ctx.author.mention
 
@@ -339,7 +339,7 @@ class InfractionScheduler(Scheduler):
         """Remove given infraction from database"""
 
         if not infraction:
-            await ctx.send(":x: No such infraction")
+            await ctx.send(f"{Emojis.cross_mark} No such infraction")
             return
         # Try to pardon it first
         log_text = await self.pardon_infraction(ctx, infraction, send_log=False)
