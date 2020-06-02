@@ -47,8 +47,10 @@ class TimeTests(unittest.TestCase):
             with self.subTest(max_units=max_units), self.assertRaises(ValueError) as error:
                 time.humanize_delta(relativedelta(
                     days=2, hours=2), "hours", max_units)
-            self.assertEqual(str(error.exception),
-                             "max_units must be positive")
+            self.assertEqual(
+                str(error.exception),
+                "max_units must be positive"
+            )
 
     @patch("asyncio.sleep", new_callable=AsyncMock)
     def test_wait_until(self, mock):
