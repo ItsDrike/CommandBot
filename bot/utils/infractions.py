@@ -1,4 +1,3 @@
-# Infractions
 import datetime
 import logging
 
