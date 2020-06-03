@@ -26,7 +26,7 @@ class Infraction:
 
         self.user_id = user_id
         self.type = inf_type
-        self.reason = reason
+        self.reason = reason if reason is not None else "N/A"
         self.actor_id = actor_id
 
         if type(start) == datetime.datetime:
