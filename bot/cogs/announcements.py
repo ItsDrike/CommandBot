@@ -6,7 +6,7 @@ from discord.ext.commands import Context, command
 from bot.bot import Bot
 from bot.constants import STAFF_ROLES
 from bot.constants import Bot as BotConstant
-from bot.constants import Channels, Roles
+from bot.constants import Channels, Emojis, Roles
 from bot.decorators import in_whitelist
 from bot.utils.checks import with_role_check, without_role_check
 
@@ -27,9 +27,9 @@ class Announcements(commands.Cog):
 
             await author.add_roles(role)
             log.debug(f"User {author} has subscribed to notifications")
-            await ctx.send(f"You will now be notified on new announcements {author.mention}")
+            await ctx.send(f"{Emojis.check_mark}You will now be notified on new announcements {author.mention}")
         else:
-            await ctx.send(f"You are already subscribed (use {BotConstant.prefix}unsubscribe to unsubscribe)")
+            await ctx.send(f"{Emojis.cross_mark}You are already subscribed (use `{BotConstant.prefix}unsubscribe` to unsubscribe)")
 
     @in_whitelist(redirect=Channels.commands, roles=STAFF_ROLES)
     @command()
@@ -41,9 +41,9 @@ class Announcements(commands.Cog):
 
             await author.remove_roles(role)
             log.debug(f"User {author} has unsubscribed to notifications")
-            await ctx.send(f"You will no longer be notified on new announcements {author.mention}")
+            await ctx.send(f"{Emojis.check_mark}You will no longer be notified on new announcements {author.mention}")
         else:
-            await ctx.send(f"You are already unsubscribed (use {BotConstant.prefix}subscribe to subscribe)")
+            await ctx.send(f"{Emojis.cross_mark}You are already unsubscribed (use `{BotConstant.prefix}subscribe` to subscribe)")
 
 
 def setup(bot: Bot) -> None:
