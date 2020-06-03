@@ -48,7 +48,7 @@ class Infraction:
 
     @property
     def active(self) -> bool:
-        '''Determine if infraction is currently active'''
+        """Determine if infraction is currently active"""
         if datetime.datetime.now() > self.stop and self.duration != 1_000_000_000:
             return False
         else:
@@ -61,11 +61,11 @@ class Infraction:
     @property
     def str_duration(self) -> str:
         if self.duration == 1_000_000_000:
-            return 'permanent'
+            return "permanent"
         duration = time.humanize_delta(
             relativedelta(seconds=self.duration), max_units=2)
-        if duration == 'less than a second':
-            duration = 'instant'
+        if duration == "less than a second":
+            duration = "instant"
         return duration
 
     @property
@@ -73,18 +73,18 @@ class Infraction:
         return time.time_since(self.start, max_units=2)
 
     def add_to_database(self) -> None:
-        '''Add infraction to the database'''
+        """Add infraction to the database"""
         log.debug(
-            f'Adding infraction {self.type} to {self.user_id} by {self.actor_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]')
+            f"Adding infraction {self.type} to {self.user_id} by {self.actor_id}, reason: {self.reason} ; {self.str_start} [{self.duration}]")
 
         # In order to prevent SQL Injections use `?` as placeholder and let SQLite handle the input
-        sql_write_command = '''INSERT INTO infractions VALUES(?, ?, ?, ?, ?, ?, ?);'''
+        sql_write_command = """INSERT INTO infractions VALUES(?, ?, ?, ?, ?, ?, ?);"""
         sql_write_args = (self.user_id, self.type, self.reason, self.actor_id,
                           self.str_start, self.duration, int(self.is_active))
 
-        sql_find_command = '''SELECT rowid FROM infractions WHERE(
+        sql_find_command = """SELECT rowid FROM infractions WHERE(
                         UID=? and Type=? and Reason=? and ActorID=? and Start=? and Duration=? and Active=?
-        );'''
+        );"""
         sql_find_args = (self.user_id, self.type, self.reason, self.actor_id,
                          self.str_start, self.duration, int(self.is_active))
 
@@ -95,11 +95,11 @@ class Infraction:
         db.close()
 
     def make_inactive(self) -> None:
-        '''Set infraction Active state to 0 in database'''
+        """Set infraction Active state to 0 in database"""
         log.debug(
-            f'Deactivating infraction #{self.id}: {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]')
+            f"Deactivating infraction #{self.id}: {self.type} to {self.user_id}, reason: {self.reason}; {self.str_start} [{self.duration}]")
 
-        sql_command = '''UPDATE infractions SET Active=0 WHERE rowid=?;'''
+        sql_command = """UPDATE infractions SET Active=0 WHERE rowid=?;"""
         sql_args = (self.id, )
 
         db = SQLite()
@@ -109,10 +109,10 @@ class Infraction:
 
 def get_infraction_by_row(row_id: int) -> Infraction:
     db = SQLite()
-    db.execute('SELECT *, rowid FROM infractions WHERE rowid=?', (row_id, ))
+    db.execute("SELECT *, rowid FROM infractions WHERE rowid=?", (row_id, ))
     try:
         infraction = Infraction(*db.cur.fetchone())
-        log.debug(f'Getting infraction #{row_id}')
+        log.debug(f"Getting infraction #{row_id}")
     except TypeError:
         infraction = False
     db.close()
@@ -121,11 +121,11 @@ def get_infraction_by_row(row_id: int) -> Infraction:
 
 
 def get_all_active_infractions(inf_type: str = None) -> list:
-    log.debug('Getting all active infractions')
+    log.debug("Getting all active infractions")
 
     # Get all infractions from database
     db = SQLite()
-    db.execute('SELECT *, rowid FROM infractions WHERE Active=1;')
+    db.execute("SELECT *, rowid FROM infractions WHERE Active=1;")
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -139,11 +139,11 @@ def get_all_active_infractions(inf_type: str = None) -> list:
 
 
 def get_infractions(user: UserSnowflake, inf_type: str = None) -> list:
-    log.debug(f'Getting infractions of {user}')
+    log.debug(f"Getting infractions of {user}")
 
     # Get all infractions from database
     db = SQLite()
-    db.execute('SELECT *, rowid FROM infractions WHERE UID=?', (user.id, ))
+    db.execute("SELECT *, rowid FROM infractions WHERE UID=?", (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -157,12 +157,12 @@ def get_infractions(user: UserSnowflake, inf_type: str = None) -> list:
 
 
 def get_active_infractions(user: UserSnowflake, inf_type: str = None) -> list:
-    log.debug(f'Getting active infractions of {user}')
+    log.debug(f"Getting active infractions of {user}")
 
     # Get all infractions from database
     db = SQLite()
     db.execute(
-        'SELECT *, rowid FROM infractions WHERE UID=? AND Active=1', (user.id, ))
+        "SELECT *, rowid FROM infractions WHERE UID=? AND Active=1", (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -176,12 +176,12 @@ def get_active_infractions(user: UserSnowflake, inf_type: str = None) -> list:
 
 
 def get_inactive_infractions(user: UserSnowflake, inf_type: str = None) -> list:
-    log.debug(f'Getting inactive infractions of {user}')
+    log.debug(f"Getting inactive infractions of {user}")
 
     # Get all infractions from database
     db = SQLite()
     db.execute(
-        'SELECT *, rowid FROM infractions WHERE UID=? AND Active=0', (user.id, ))
+        "SELECT *, rowid FROM infractions WHERE UID=? AND Active=0", (user.id, ))
     infractions = [infraction for infraction in db.cur.fetchall()]
     db.close()
 
@@ -197,5 +197,5 @@ def get_inactive_infractions(user: UserSnowflake, inf_type: str = None) -> list:
 def remove_infraction(infraction: Infraction) -> None:
     row_id = infraction.id
     db = SQLite()
-    db.execute('DELETE FROM infractions WHERE rowid=?', (row_id, ))
+    db.execute("DELETE FROM infractions WHERE rowid=?", (row_id, ))
     db.close()

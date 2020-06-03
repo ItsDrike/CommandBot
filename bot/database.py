@@ -21,7 +21,7 @@ class SQLite():
 
     def create_init_tables(self):
         try:
-            self.execute('''CREATE TABLE infractions(
+            self.execute("""CREATE TABLE infractions(
                             UID INTEGER,
                             Type TEXT,
                             Reason TEXT,
@@ -29,12 +29,12 @@ class SQLite():
                             Start TEXT,
                             Duration INTEGER,
                             Active INTEGER
-                            );''')
-            self.execute('''CREATE TABLE users(
+                            );""")
+            self.execute("""CREATE TABLE users(
                             UID INTEGER,
                             Muted INTEGER,
                             Banned INTEGER
-                            );''')
-            log.info('Database tables created')
+                            );""")
+            log.info("Database tables created")
         except lite.OperationalError:
-            log.debug('Tables exists')
+            log.debug("Tables exists")

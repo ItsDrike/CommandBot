@@ -40,7 +40,7 @@ class SecurityCogTests(unittest.TestCase):
 
     def test_check_on_guild_returns_true_inside_of_guild(self):
         """When invoked inside of a guild, `check_on_guild` should return `True`."""
-        self.ctx.guild = "lemon's lemonade stand"
+        self.ctx.guild = "ItsDrike's cool name"
         self.assertTrue(self.cog.check_on_guild(self.ctx))
 
 

@@ -10,9 +10,9 @@ from bot.bot import Bot
 from bot.cogs.moderation.modlog import ModLog
 from bot.constants import MODERATION_ROLES
 from bot.constants import Bot as BotConstant
-from bot.constants import Icons
-from bot.decorators import with_role
+from bot.constants import Emojis, Icons
 from bot.converters import FetchedMember
+from bot.decorators import with_role
 
 prefix = BotConstant.prefix
 
@@ -44,7 +44,7 @@ class Embeds(Cog):
             await ctx.send(f"{ctx.author.mention} You are now in embed creation mode, use `{prefix}help Embed` for more info")
             self.embeds[ctx.author] = Embed()
         else:
-            await ctx.send(f":x: {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} You are already in embed creation mode, use `{prefix}help Embed` for more info")
 
     @command()
     @with_role(*MODERATION_ROLES)
@@ -54,7 +54,7 @@ class Embeds(Cog):
             await ctx.send(f"{ctx.author.mention} You are no longer in embed creation mode, your embed was cleared")
             del self.embeds[ctx.author]
         else:
-            await ctx.send(f":x: {ctx.author.mention} You aren't in embed mode")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} You aren't in embed mode")
 
     @command()
     @with_role(*MODERATION_ROLES)
@@ -88,13 +88,13 @@ class Embeds(Cog):
                 """),
             )
             log.info(f"User {ctx.author} sent embed message to #{channel}")
-            await ctx.send(":white_check_mark: Embed sent")
+            await ctx.send(f"{Emojis.check_mark} Embed sent")
         else:
-            await ctx.send(f":x: {ctx.author.mention} Sorry but you don't have permission to send messages to this channel")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} Sorry but you don't have permission to send messages to this channel")
 
     # endregion
     # region: embed build
-    @group(invoke_without_command=True, name='embed', aliases=["embedset"])
+    @group(invoke_without_command=True, name="embed", aliases=["embedset"])
     @with_role(*MODERATION_ROLES)
     async def embed_group(self, ctx: Context) -> None:
         """Commands for configuring the Embed message"""
@@ -224,7 +224,7 @@ class Embeds(Cog):
         if not await self.has_active_embed(ctx):
             return
         if self.embed_field_id[ctx.author] < ID or ID < 0:
-            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
         embed = self.embeds[ctx.author]
@@ -242,7 +242,7 @@ class Embeds(Cog):
         if not await self.has_active_embed(ctx):
             return
         if self.embed_field_id[ctx.author] < ID or ID < 0:
-            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
         embed = self.embeds[ctx.author]
@@ -261,7 +261,7 @@ class Embeds(Cog):
             return
 
         if self.embed_field_id[ctx.author] < ID or ID < 0:
-            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
         embed = self.embeds[ctx.author]
@@ -284,7 +284,7 @@ class Embeds(Cog):
             return
 
         if self.embed_field_id[ctx.author] < ID or ID < 0:
-            await ctx.send(f":x: {ctx.author.mention} Sorry, but there is no such field ID")
+            await ctx.send(f"{Emojis.cross_mark} {ctx.author.mention} Sorry, but there is no such field ID")
             return
 
         self.embeds[ctx.author].remove_field(ID)
@@ -297,10 +297,13 @@ class Embeds(Cog):
         if ctx.author in self.embeds:
             return True
         else:
-            await ctx.send(f":x: {ctx.author.mention} No active embed found, are you in embed building mode? (`{Bot.prefix}help Embeds`)")
+            await ctx.send(
+                f"{Emojis.cross_mark} {ctx.author.mention} No active embed found, "
+                f"are you in embed building mode? (`{BotConstant.prefix}help Embeds`)"
+            )
             return False
 
 
 def setup(bot: Bot) -> None:
-    '''Load the Embeds cog.'''
+    """Load the Embeds cog."""
     bot.add_cog(Embeds(bot))

@@ -10,9 +10,9 @@ from bot.converters import DiceThrow
 
 
 class Fun(Cog):
-    '''
+    """
     A cog for built solely for fun
-    '''
+    """
 
     roll_pattern = re.compile(r"[1-9]*d[1-9]+")
 
@@ -21,10 +21,10 @@ class Fun(Cog):
 
     @command(name="roll", aliases=["dice", "throw", "dicethrow"])
     async def roll(self, ctx: Context, roll_string: DiceThrow) -> None:
-        '''
+        """
         Roll a random number on dice
         roll_patterns: XdY X: times, Y: dice sides [f.e.: 4d20 = roll 20-sided dice 4 times]
-        '''
+        """
         throws = roll_string[0]
         sides = roll_string[1]
 
@@ -54,5 +54,5 @@ class Fun(Cog):
 
 
 def setup(bot: Bot) -> None:
-    '''Load the Clean cog.'''
+    """Load the Clean cog."""
     bot.add_cog(Fun(bot))
