@@ -143,12 +143,10 @@ class Silence(Scheduler, commands.Cog):
 
         await channel.set_permissions(self._guests_role, **dict(current_overwrite, send_messages=False))
 
-        if not duration:
+        if duration:
+            log.info(f"Silenced #{channel} ({channel.id}) for {duration} minute(s).")
+        else:
             log.info(f"Silenced #{channel} ({channel.id}) indefinitely.")
-            return True
-
-        log.info(
-            f"Silenced #{channel} ({channel.id}) for {duration} minute(s).")
         return True
 
     async def _unsilence(self, channel: TextChannel) -> bool:
