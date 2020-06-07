@@ -30,7 +30,6 @@ class Silence(Scheduler, commands.Cog):
     def __init__(self, bot: Bot):
         super().__init__()
         self.bot = bot
-        self.muted_channels = set()
         self._get_instance_var_task = self.bot.loop.create_task(
             self._get_instance_vars())
         self._get_instance_vars_event = asyncio.Event()
@@ -143,7 +142,6 @@ class Silence(Scheduler, commands.Cog):
             return False
 
         await channel.set_permissions(self._guests_role, **dict(current_overwrite, send_messages=False))
-        self.muted_channels.add(channel)
 
         if not duration:
             log.info(f"Silenced #{channel} ({channel.id}) indefinitely.")
@@ -164,7 +162,6 @@ class Silence(Scheduler, commands.Cog):
         if current_overwrite.send_messages is False:
             await channel.set_permissions(self._guests_role, **dict(current_overwrite, send_messages=None))
             log.info(f"Unsilenced channel #{channel} ({channel.id}).")
-            self.muted_channels.discard(channel)
             self.cancel_task(channel.id)
             return True
         log.info(
