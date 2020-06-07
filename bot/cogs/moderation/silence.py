@@ -112,8 +112,7 @@ class Silence(Scheduler, commands.Cog):
             return
 
         await self._get_instance_vars_event.wait()
-        log.debug(
-            f"Unsilencing channel #{ctx.channel} from {ctx.author}'s command.")
+        log.debug(f"Unsilencing channel #{ctx.channel} from {ctx.author}'s command.")
 
         if not await self._unsilence(ctx.channel):
             await ctx.send(f"{Emojis.cross_mark} current channel is not silenced")
@@ -137,8 +136,7 @@ class Silence(Scheduler, commands.Cog):
         """Silence `channel` for `self._guests_role`"""
         current_overwrite = channel.overwrites_for(self._guests_role)
         if current_overwrite.send_messages is False:
-            log.info(
-                f"Tried to silence channel #{channel} ({channel.id}) but the channel was already silenced.")
+            log.info(f"Tried to silence channel #{channel} ({channel.id}) but the channel was already silenced.")
             return False
 
         await channel.set_permissions(self._guests_role, **dict(current_overwrite, send_messages=False))
@@ -162,8 +160,7 @@ class Silence(Scheduler, commands.Cog):
             log.info(f"Unsilenced channel #{channel} ({channel.id}).")
             self.cancel_task(channel.id)
             return True
-        log.info(
-            f"Tried to unsilence channel ${channel} ({channel.id}) but the channel was not silenced.")
+        log.info(f"Tried to unsilence channel ${channel} ({channel.id}) but the channel was not silenced.")
         return False
 
     def cog_check(self, ctx: Context) -> bool:
