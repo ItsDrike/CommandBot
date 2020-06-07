@@ -115,7 +115,7 @@ class Silence(Scheduler, commands.Cog):
         log.debug(f"Unsilencing channel #{ctx.channel} from {ctx.author}'s command.")
 
         if not await self._unsilence(ctx.channel):
-            await ctx.send(f"{Emojis.cross_mark} current channel is not silenced")
+            await ctx.send(f"{Emojis.cross_mark} current channel was not silenced.")
             return
 
         await ctx.send(f"{Emojis.check_mark} unsilenced current channel.")
