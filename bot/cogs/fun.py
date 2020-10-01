@@ -71,21 +71,6 @@ class Fun(Cog):
                 await ctx.send(f"Something went boom! :( [CODE: {resp.status}]")
 
     @command()
-    async def duck(self, ctx: Context) -> None:
-        """Get a random picture of a duck."""
-        async with self.session.get("https://random-d.uk/api/v2/random") as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                embed = Embed(
-                    title="Random Duck!",
-                    color=Color.gold()
-                )
-                embed.set_image(url=data["url"])
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send(f"Something went boom! :( [CODE: {resp.status}]")
-
-    @command()
     async def koala(self, ctx: Context) -> None:
         """Get a random picture of a koala."""
         async with self.session.get("https://some-random-api.ml/img/koala") as resp:
