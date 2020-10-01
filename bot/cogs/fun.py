@@ -1,7 +1,7 @@
 import re
-from random import randint
+from random import randint, choice
 
-from discord import Colour, Embed
+from discord import Color, Embed
 from discord.ext.commands import Cog, Context, command
 
 import aiohttp
@@ -36,7 +36,7 @@ class Fun(Cog):
 
         # Change color and extra in case there is a natural roll
         # If natural 1 red 20 green, otherwise use blurple
-        color = Colour.blurple()
+        color = Color.blurple()
         extra = " "
         if all(throw == rolls[0] for throw in rolls):  # All rolls are same
             if rolls[0] == 1:

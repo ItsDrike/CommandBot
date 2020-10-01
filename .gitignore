@@ -21,3 +21,6 @@ config.yaml
 
 # Coverage.py execution data
 .coverage
+
+# codespaces files
+pythonenv3.8/
