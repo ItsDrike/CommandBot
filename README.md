@@ -1,4 +1,8 @@
-# CommandBot
+# Deprecation Message
+
+This repository is now deprecated, but the bot development isn't stopped completely. There is a completely new version of this bot, with a whole new codebase and much better code: visit https://github.com/Codin-Nerds/Neutron-Bot for the continued version
+
+# Former Readme
 
 [![Discord](https://img.shields.io/static/v1?label=ItsDrike&logo=discord&message=Join&color=%237289DA&logoColor=white)](https://discord.gg/ZVyn3fk)
 [![Build Status](https://travis-ci.com/ItsDrike/CommandBot.svg?branch=master)](https://travis-ci.com/ItsDrike/CommandBot)
